@@ -1,6 +1,8 @@
 package MapleScala.Crypto
 
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
+
+import MapleScala.Connection.Packets.PacketReader
 
 /**
  * Copyright 2015 Yaminike
@@ -21,13 +23,11 @@ class CipherHelper {
   @volatile final var RIV: Int = MapleScala.Helper.random.nextInt()
   @volatile final var SIV: Int = MapleScala.Helper.random.nextInt()
   private final val DefaultKey: Int = 0xC65053F2
-  private final val ConversionBuffer: ByteBuffer = ByteBuffer.allocate(4)
   private final val AES = new FastAES()
 
   // TODO: multiple packet support?
-  def decrypt(in: ByteBuffer): ByteBuffer = {
+  def decrypt(in: ByteBuffer): PacketReader = {
     in.clear() // resets the position
-
 
     // Copy to new array
     val length: Int = getPacketLength(in.getShort, in.getShort)
@@ -42,7 +42,7 @@ class CipherHelper {
     decryptShanda(result)
 
     // Create result
-    ByteBuffer.wrap(result)
+    new PacketReader(ByteBuffer.wrap(result).order(ByteOrder.LITTLE_ENDIAN))
   }
 
   private[Crypto] def transform(in: Array[Byte], read: Int, vector: Int): Unit = {

@@ -1,10 +1,10 @@
 package MapleScala.Connection
 
+import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets.{MapleString, PacketWriter}
 import MapleScala.Crypto.CipherHelper
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io._
-import akka.util.ByteString
 
 /**
  * Copyright 2015 Yaminike
@@ -33,13 +33,12 @@ class Client(val connection: ActorRef) extends Actor {
   handshake
 
   def receive = {
-    case Received(data) => parseData(data)
+    case Received(data) => PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
     case PeerClosed => context.stop(self)
   }
 
-  private def parseData(data: ByteString): Unit = {
-    val buffer = cipher.decrypt(data.asByteBuffer)
-    println(MapleScala.Helper.toHex(buffer.array()))
+  def setActive = {
+    //TODO: think of what to do here
   }
 
   private def handshake = {
