@@ -20,23 +20,21 @@ import org.scalatest._
  * limitations under the License.
  */
 class FastAESSpec extends FlatSpec with Matchers {
-  private final val aes = new FastAES()
-
   "ToInt" should "validate" in {
     val key: Array[Byte] = Array(0xEF, 0xBE, 0xAD, 0xDE).map(_.toByte)
-    aes.ToInt(key, 0) should be(0xDEADBEEF)
+    FastAES.ToInt(key, 0) should be(0xDEADBEEF)
   }
 
   "Shift" should "validate" in {
-    aes.Shift(aes.Shift(0xDEADBEEF, 8), 24) should be(0xDEADBEEF)
+    FastAES.Shift(FastAES.Shift(0xDEADBEEF, 8), 24) should be(0xDEADBEEF)
   }
 
   "Subword" should "validate" in {
-    aes.SubWord(0xDEADBEEF) should be(0x1D95AEDF)
+    FastAES.SubWord(0xDEADBEEF) should be(0x1D95AEDF)
   }
 
   "generateWorkingKey" should "validate" in {
-    val wk = aes.generateWorkingKey
+    val wk = FastAES.generateWorkingKey
     val expected: Array[Int] = Array(
       0x000000B4, 0x00000052,
       0x006363CB, 0x63FBFB6A,
@@ -50,7 +48,7 @@ class FastAESSpec extends FlatSpec with Matchers {
   "transform" should "validate" in {
     val buffer: Array[Int] = new Array(4)
     val result: ByteBuffer = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN)
-    aes.TransformBlock(buffer)
+    FastAES.TransformBlock(buffer)
     buffer.foreach(result.putInt)
     MapleScala.Helper.toHex(result.array()) should be("01 62 24 5F 02 43 43 E2 F7 C0 F9 57 27 7C 44 3E")
   }

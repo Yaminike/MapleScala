@@ -21,7 +21,7 @@ import java.nio._
 /**
  * FastAES based on the AesFastEngine from bouncy castle
  */
-class FastAES {
+object FastAES {
   private final val rounds = 14
   private final val CWvsKey = 0x130806B41B0F3352L
   private final val workingKey: Array[Array[Int]] = generateWorkingKey
@@ -52,31 +52,31 @@ class FastAES {
     //Loop 2 rounds of SubBytes, ShiftRows, MixColumns and AddRoundKey
     for (i <- 0 until (rounds - 2) by 2) {
       wk = workingKey(i + 1)
-      r0 = FastAES.Table0(C0 & 0xFF) ^ FastAES.Table1((C1 >>> 8) & 0xFF) ^ FastAES.Table2((C2 >>> 16) & 0xFF) ^ FastAES.Table3(C3 >>> 24) ^ wk(0)
-      r1 = FastAES.Table0(C1 & 0xFF) ^ FastAES.Table1((C2 >>> 8) & 0xFF) ^ FastAES.Table2((C3 >>> 16) & 0xFF) ^ FastAES.Table3(C0 >>> 24) ^ wk(1)
-      r2 = FastAES.Table0(C2 & 0xFF) ^ FastAES.Table1((C3 >>> 8) & 0xFF) ^ FastAES.Table2((C0 >>> 16) & 0xFF) ^ FastAES.Table3(C1 >>> 24) ^ wk(2)
-      r3 = FastAES.Table0(C3 & 0xFF) ^ FastAES.Table1((C0 >>> 8) & 0xFF) ^ FastAES.Table2((C1 >>> 16) & 0xFF) ^ FastAES.Table3(C2 >>> 24) ^ wk(3)
+      r0 = Table0(C0 & 0xFF) ^ Table1((C1 >>> 8) & 0xFF) ^ Table2((C2 >>> 16) & 0xFF) ^ Table3(C3 >>> 24) ^ wk(0)
+      r1 = Table0(C1 & 0xFF) ^ Table1((C2 >>> 8) & 0xFF) ^ Table2((C3 >>> 16) & 0xFF) ^ Table3(C0 >>> 24) ^ wk(1)
+      r2 = Table0(C2 & 0xFF) ^ Table1((C3 >>> 8) & 0xFF) ^ Table2((C0 >>> 16) & 0xFF) ^ Table3(C1 >>> 24) ^ wk(2)
+      r3 = Table0(C3 & 0xFF) ^ Table1((C0 >>> 8) & 0xFF) ^ Table2((C1 >>> 16) & 0xFF) ^ Table3(C2 >>> 24) ^ wk(3)
       wk = workingKey(i + 2)
-      C0 = FastAES.Table0(r0 & 0xFF) ^ FastAES.Table1((r1 >>> 8) & 0xFF) ^ FastAES.Table2((r2 >>> 16) & 0xFF) ^ FastAES.Table3(r3 >>> 24) ^ wk(0)
-      C1 = FastAES.Table0(r1 & 0xFF) ^ FastAES.Table1((r2 >>> 8) & 0xFF) ^ FastAES.Table2((r3 >>> 16) & 0xFF) ^ FastAES.Table3(r0 >>> 24) ^ wk(1)
-      C2 = FastAES.Table0(r2 & 0xFF) ^ FastAES.Table1((r3 >>> 8) & 0xFF) ^ FastAES.Table2((r0 >>> 16) & 0xFF) ^ FastAES.Table3(r1 >>> 24) ^ wk(2)
-      C3 = FastAES.Table0(r3 & 0xFF) ^ FastAES.Table1((r0 >>> 8) & 0xFF) ^ FastAES.Table2((r1 >>> 16) & 0xFF) ^ FastAES.Table3(r2 >>> 24) ^ wk(3)
+      C0 = Table0(r0 & 0xFF) ^ Table1((r1 >>> 8) & 0xFF) ^ Table2((r2 >>> 16) & 0xFF) ^ Table3(r3 >>> 24) ^ wk(0)
+      C1 = Table0(r1 & 0xFF) ^ Table1((r2 >>> 8) & 0xFF) ^ Table2((r3 >>> 16) & 0xFF) ^ Table3(r0 >>> 24) ^ wk(1)
+      C2 = Table0(r2 & 0xFF) ^ Table1((r3 >>> 8) & 0xFF) ^ Table2((r0 >>> 16) & 0xFF) ^ Table3(r1 >>> 24) ^ wk(2)
+      C3 = Table0(r3 & 0xFF) ^ Table1((r0 >>> 8) & 0xFF) ^ Table2((r1 >>> 16) & 0xFF) ^ Table3(r2 >>> 24) ^ wk(3)
     }
 
 
     //A single round of SubBytes, ShiftRows, MixColumns and AddRoundKey
     wk = workingKey(rounds - 1)
-    r0 = FastAES.Table0(C0 & 0xFF) ^ FastAES.Table1((C1 >>> 8) & 0xFF) ^ FastAES.Table2((C2 >>> 16) & 0xFF) ^ FastAES.Table3(C3 >>> 24) ^ wk(0)
-    r1 = FastAES.Table0(C1 & 0xFF) ^ FastAES.Table1((C2 >>> 8) & 0xFF) ^ FastAES.Table2((C3 >>> 16) & 0xFF) ^ FastAES.Table3(C0 >>> 24) ^ wk(1)
-    r2 = FastAES.Table0(C2 & 0xFF) ^ FastAES.Table1((C3 >>> 8) & 0xFF) ^ FastAES.Table2((C0 >>> 16) & 0xFF) ^ FastAES.Table3(C1 >>> 24) ^ wk(2)
-    r3 = FastAES.Table0(C3 & 0xFF) ^ FastAES.Table1((C0 >>> 8) & 0xFF) ^ FastAES.Table2((C1 >>> 16) & 0xFF) ^ FastAES.Table3(C2 >>> 24) ^ wk(3)
+    r0 = Table0(C0 & 0xFF) ^ Table1((C1 >>> 8) & 0xFF) ^ Table2((C2 >>> 16) & 0xFF) ^ Table3(C3 >>> 24) ^ wk(0)
+    r1 = Table0(C1 & 0xFF) ^ Table1((C2 >>> 8) & 0xFF) ^ Table2((C3 >>> 16) & 0xFF) ^ Table3(C0 >>> 24) ^ wk(1)
+    r2 = Table0(C2 & 0xFF) ^ Table1((C3 >>> 8) & 0xFF) ^ Table2((C0 >>> 16) & 0xFF) ^ Table3(C1 >>> 24) ^ wk(2)
+    r3 = Table0(C3 & 0xFF) ^ Table1((C0 >>> 8) & 0xFF) ^ Table2((C1 >>> 16) & 0xFF) ^ Table3(C2 >>> 24) ^ wk(3)
 
     //Final round of SubBytes, ShiftRows and AddRoundKey
     wk = workingKey(rounds)
-    C0 = (FastAES.Sbox(r0 & 0xFF) & 0xFF) ^ ((FastAES.Sbox((r1 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((FastAES.Sbox((r2 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((FastAES.Sbox(r3 >>> 24) & 0xFF) << 24) ^ wk(0)
-    C1 = (FastAES.Sbox(r1 & 0xFF) & 0xFF) ^ ((FastAES.Sbox((r2 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((FastAES.Sbox((r3 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((FastAES.Sbox(r0 >>> 24) & 0xFF) << 24) ^ wk(1)
-    C2 = (FastAES.Sbox(r2 & 0xFF) & 0xFF) ^ ((FastAES.Sbox((r3 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((FastAES.Sbox((r0 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((FastAES.Sbox(r1 >>> 24) & 0xFF) << 24) ^ wk(2)
-    C3 = (FastAES.Sbox(r3 & 0xFF) & 0xFF) ^ ((FastAES.Sbox((r0 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((FastAES.Sbox((r1 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((FastAES.Sbox(r2 >>> 24) & 0xFF) << 24) ^ wk(3)
+    C0 = (Sbox(r0 & 0xFF) & 0xFF) ^ ((Sbox((r1 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((Sbox((r2 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((Sbox(r3 >>> 24) & 0xFF) << 24) ^ wk(0)
+    C1 = (Sbox(r1 & 0xFF) & 0xFF) ^ ((Sbox((r2 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((Sbox((r3 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((Sbox(r0 >>> 24) & 0xFF) << 24) ^ wk(1)
+    C2 = (Sbox(r2 & 0xFF) & 0xFF) ^ ((Sbox((r3 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((Sbox((r0 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((Sbox(r1 >>> 24) & 0xFF) << 24) ^ wk(2)
+    C3 = (Sbox(r3 & 0xFF) & 0xFF) ^ ((Sbox((r0 >>> 8) & 0xFF) & 0xFF) << 8) ^ ((Sbox((r1 >>> 16) & 0xFF) & 0xFF) << 16) ^ ((Sbox(r2 >>> 24) & 0xFF) << 24) ^ wk(3)
 
     buffer(0) = C0
     buffer(1) = C1
@@ -99,7 +99,7 @@ class FastAES {
     for (i <- keyLength until k) {
       var temp = workingKey((i - 1) >>> 2)((i - 1) & 3)
       if (i % keyLength == 0)
-        temp = SubWord(Shift(temp, 8)) ^ FastAES.Rcon((i / keyLength) - 1)
+        temp = SubWord(Shift(temp, 8)) ^ Rcon((i / keyLength) - 1)
       else if ((i % keyLength) == 4)
         temp = SubWord(temp)
 
@@ -126,14 +126,12 @@ class FastAES {
 
   private[Crypto] def Shift(x: Int, shift: Int): Int = (x >>> shift) | (x << (32 - shift))
 
-  private[Crypto] def SubWord(x: Int): Int = FastAES.Sbox(x & 0xFF) & 0xFF |
-    (FastAES.Sbox((x >>> 8) & 0xFF) & 0xFF) << 8 |
-    (FastAES.Sbox((x >>> 16) & 0xFF) & 0xFF) << 16 |
-    (FastAES.Sbox((x >>> 24) & 0xFF) & 0xFF) << 24
-}
+  private[Crypto] def SubWord(x: Int): Int = Sbox(x & 0xFF) & 0xFF |
+    (Sbox((x >>> 8) & 0xFF) & 0xFF) << 8 |
+    (Sbox((x >>> 16) & 0xFF) & 0xFF) << 16 |
+    (Sbox((x >>> 24) & 0xFF) & 0xFF) << 24
 
-object FastAES {
-  private final val Sbox: Array[Byte] = Array(
+  private lazy final val Sbox: Array[Byte] = Array(
     99, 124, 119, 123, 242, 107, 111, 197,
     48, 1, 103, 43, 254, 215, 171, 118,
     202, 130, 201, 125, 250, 89, 71, 240,
@@ -168,7 +166,7 @@ object FastAES {
     65, 153, 45, 15, 176, 84, 187, 22
   ).map(_.toByte)
 
-  private final val Rcon: Array[Byte] = Array(
+  private lazy final val Rcon: Array[Byte] = Array(
     0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36, 0x6c, 0xd8, 0xab, 0x4d, 0x9a,
     0x2f, 0x5e, 0xbc, 0x63, 0xc6, 0x97, 0x35, 0x6a, 0xd4, 0xb3, 0x7d, 0xfa, 0xef, 0xc5, 0x91
   ).map(_.toByte)

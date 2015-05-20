@@ -1,5 +1,6 @@
 package MapleScala.Crypto
 
+import MapleScala.Connection.Packets.{MapleString, PacketWriter}
 import org.scalatest._
 
 /**
@@ -18,11 +19,22 @@ import org.scalatest._
  * limitations under the License.
  */
 class CipherHelperSpec extends FlatSpec with Matchers {
-  private final val cipher = new CipherHelper()
+  private final val cipher = new CipherHelper(null)
 
   "transform" should "validate" in {
     val buffer: Array[Byte] = new Array(16)
     cipher.transform(buffer, 16, 0xDEADBEEF)
     MapleScala.Helper.toHex(buffer) should be("9B E5 2F FE 37 3B 93 00 50 E0 09 FB FB 3F 97 A9")
+  }
+
+  "decrypt and encrypt" should "validate" in {
+    cipher.RIV = 0xDEADBEEF
+    cipher.SIV = 0xDEADBEEF
+
+    val pw: PacketWriter = new PacketWriter
+    val sTest: String = "testing encryption and decryption"
+    pw.write(new MapleString(sTest))
+    val pr = cipher.decrypt(cipher.encrypt(pw.result).asByteBuffer)
+    pr.readMapleString should be(sTest)
   }
 }

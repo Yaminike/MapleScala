@@ -29,7 +29,7 @@ class Server(port: Int) extends Actor {
   import Tcp._
   import context.system
 
-  IO(Tcp) ! Bind(self, new InetSocketAddress("10.0.1.95", port))
+  IO(Tcp) ! Bind(self, new InetSocketAddress("0.0.0.0", port))
 
   override def receive = {
     case Bound(localAddress) =>

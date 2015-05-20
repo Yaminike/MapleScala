@@ -2,7 +2,10 @@ package MapleScala.Crypto
 
 import java.nio.{ByteBuffer, ByteOrder}
 
+import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
+import akka.io.Tcp.Abort
+import akka.util.{ByteString, ByteStringBuilder}
 
 /**
  * Copyright 2015 Yaminike
@@ -19,14 +22,20 @@ import MapleScala.Connection.Packets.PacketReader
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class CipherHelper {
+class CipherHelper(final val client: Client) {
   @volatile final var RIV: Int = MapleScala.Helper.random.nextInt()
   @volatile final var SIV: Int = MapleScala.Helper.random.nextInt()
   private final val DefaultKey: Int = 0xC65053F2
-  private final val AES = new FastAES()
+  private final val GameVersion = 83
 
   // TODO: multiple packet support?
   def decrypt(in: ByteBuffer): PacketReader = {
+    // Validate the packet header
+    if (!checkPacketHeader(in.getShort(0)) && client != null) {
+      client.connection ! Abort
+      return new PacketReader(ByteBuffer.allocate(2))
+    }
+
     in.clear() // resets the position
 
     // Copy to new array
@@ -45,6 +54,26 @@ class CipherHelper {
     new PacketReader(ByteBuffer.wrap(result).order(ByteOrder.LITTLE_ENDIAN))
   }
 
+  def encrypt(in: ByteString): ByteString = {
+    val data: Array[Byte] = new Array(in.length)
+    in.copyToArray(data)
+
+    // Create packetheader
+    val header = new ByteStringBuilder
+    header.putInt(getPacketHeader(data))(ByteOrder.LITTLE_ENDIAN)
+
+    // Shanda transform
+    encryptShanda(data)
+
+    // AES transform
+    transform(data, in.length, SIV)
+    SIV = shuffle(SIV)
+
+    // Combine header and data
+    header.putBytes(data)
+    header.result()
+  }
+
   private[Crypto] def transform(in: Array[Byte], read: Int, vector: Int): Unit = {
     var length: Int = 0x5B0
     var start: Int = 0
@@ -61,7 +90,7 @@ class CipherHelper {
 
       for (i <- start until start + length) {
         if ((i - start) % 16 == 0)
-          AES.TransformBlock(realIV)
+          FastAES.TransformBlock(realIV)
 
         cur = (i - start) % 16
         in(i) = (in(i) ^ ((realIV(cur / 4) >>> (cur % 4 * 8)) & 0xFF)).toByte
@@ -75,6 +104,18 @@ class CipherHelper {
   private def getPacketLength(left: Short, right: Short): Int = {
     val tmp = left ^ right
     ((tmp << 8) & 0xFF00) | ((tmp >>> 8) & 0xFF)
+  }
+
+  private def getPacketHeader(data: Array[Byte]): Int = {
+    val left = (-(GameVersion + 1) ^ ((SIV << 16) >>> 16)).toShort
+    val right = (left ^ data.length).toShort
+    (left << 16) | right
+  }
+
+  private def checkPacketHeader(left: Short): Boolean = {
+    val i1 = (left ^ ((RIV << 16) >>> 16)).toShort
+    val i2 = GameVersion
+    i2 == i1
   }
 
   private def decryptShanda(buffer: Array[Byte]): Unit = {
@@ -97,11 +138,40 @@ class CipherHelper {
 
       xorKey = 0
       len = (buffer.length & 0xFF).toByte
-      for (i <- 0 until buffer.length) {
+      for (i <- buffer.indices) {
         tmp = ROL((~(buffer(i) - 0x48)).toByte, len & 0xFF)
         save = tmp
         tmp = ROR(((xorKey ^ tmp) - len).toByte, 3)
         xorKey = save
+        buffer(i) = tmp
+        len = (len - 1).toByte
+      }
+    }
+  }
+
+  private def encryptShanda(buffer: Array[Byte]): Unit = {
+    var xorKey: Byte = 0
+    var save: Byte = 0
+    var len: Byte = 0
+    var tmp: Byte = 0
+    for (pass <- 0 until 3) {
+      xorKey = 0
+      save = 0
+      len = (buffer.length & 0xFF).toByte
+      for (i <- buffer.indices) {
+        tmp = ((ROL(buffer(i), 3) + len).toByte ^ xorKey).toByte
+        xorKey = tmp
+        tmp = (((~ROR(tmp, len & 0xFF)) & 0xFF) + 0x48).toByte
+        buffer(i) = tmp
+        len = (len - 1).toByte
+      }
+      xorKey = 0
+      save = 0
+      len = (buffer.length & 0xFF).toByte
+      for (i <- buffer.length - 1 to 0 by -1) {
+        tmp = (xorKey ^ (len + ROL(buffer(i), 4))).toByte
+        xorKey = tmp
+        tmp = ROR((tmp ^ 0x13).toByte, 3)
         buffer(i) = tmp
         len = (len - 1).toByte
       }

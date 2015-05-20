@@ -27,18 +27,31 @@ object Client {
 
 class Client(val connection: ActorRef) extends Actor {
 
+  class Send(val data: PacketWriter)
+
   import Tcp._
 
-  private final val cipher = new CipherHelper()
+  private final val cipher = new CipherHelper(this)
+  private var handshaken = false
   handshake
 
   def receive = {
-    case Received(data) => PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
-    case PeerClosed => context.stop(self)
+    case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
+    case Received(data) =>
+      if (handshaken) // We need to skip the first packet from decryption, we could check for sanity I guess
+        PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
+      else
+        handshaken = true
+    case _: ConnectionClosed => disconnect
   }
 
   def setActive = {
     //TODO: think of what to do here
+  }
+
+  private def disconnect = {
+    context.stop(self)
+    println("Disconnected") // TODO: Remove
   }
 
   private def handshake = {
