@@ -30,11 +30,29 @@ class CipherHelperSpec extends FlatSpec with Matchers {
   "decrypt and encrypt" should "validate" in {
     cipher.RIV = 0xDEADBEEF
     cipher.SIV = 0xDEADBEEF
-
     val pw: PacketWriter = new PacketWriter
     val sTest: String = "testing encryption and decryption"
     pw.write(new MapleString(sTest))
-    val pr = cipher.decrypt(cipher.encrypt(pw.result).asByteBuffer)
-    pr.readMapleString should be(sTest)
+
+    for (i <- 0 until 10) {
+      val pr = cipher.decrypt(cipher.encrypt(pw.result).asByteBuffer)
+      pr.readMapleString should be(sTest)
+    }
+  }
+
+  "shanda" should "validate" in {
+    val buffer: Array[Byte] = new Array(8)
+    for (i <- 0 until 10)
+      cipher.decryptShanda(buffer)
+    for (i <- 0 until 10)
+      cipher.encryptShanda(buffer)
+    MapleScala.Helper.toHex(buffer) should be("00 00 00 00 00 00 00 00")
+  }
+
+  "shuffle" should "validate" in {
+    var vector = 0xDEADBEEF
+    for (i <- 0 until 10)
+      vector = cipher.shuffle(vector)
+    vector should be(0x621A548)
   }
 }

@@ -4,7 +4,6 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
-import akka.io.Tcp.Abort
 import akka.util.{ByteString, ByteStringBuilder}
 
 /**
@@ -30,12 +29,12 @@ class CipherHelper(final val client: Client) {
 
   // TODO: multiple packet support?
   def decrypt(in: ByteBuffer): PacketReader = {
-    in.clear() // resets the position
+    in.position(0) // resets the position
 
     // Copy to new array
     val length: Int = getPacketLength(in.getShort, in.getShort)
     val result: Array[Byte] = new Array[Byte](length)
-    in.get(result, 0, length)
+    in.get(result)
 
     // AES transform
     transform(result, length, RIV)
@@ -54,7 +53,7 @@ class CipherHelper(final val client: Client) {
 
     // Create packetheader
     val header = new ByteStringBuilder
-    header.putInt(getPacketHeader(data))(ByteOrder.LITTLE_ENDIAN)
+    setPacketHeader(header, data)
 
     // Shanda transform
     encryptShanda(data)
@@ -100,13 +99,14 @@ class CipherHelper(final val client: Client) {
     ((tmp << 8) & 0xFF00) | ((tmp >>> 8) & 0xFF)
   }
 
-  private def getPacketHeader(data: Array[Byte]): Int = {
-    val left = (-(GameVersion + 1) ^ ((SIV << 16) >>> 16)).toShort
-    val right = (left ^ data.length).toShort
-    (left << 16) | right
+  private def setPacketHeader(buffer: ByteStringBuilder, data: Array[Byte]): Unit = {
+    val left = (-(GameVersion + 1) ^ ((SIV << 16) >>> 16)) & 0xFFFF
+    val right = (left ^ data.length) & 0xFFFF
+    buffer.putShort(left)(ByteOrder.LITTLE_ENDIAN)
+    buffer.putShort(right)(ByteOrder.LITTLE_ENDIAN)
   }
 
-  private def decryptShanda(buffer: Array[Byte]): Unit = {
+  private[Crypto] def decryptShanda(buffer: Array[Byte]): Unit = {
     var xorKey: Byte = 0
     var save: Byte = 0
     var len: Byte = 0
@@ -126,7 +126,7 @@ class CipherHelper(final val client: Client) {
 
       xorKey = 0
       len = (buffer.length & 0xFF).toByte
-      for (i <- buffer.indices) {
+      for (i <- 0 until buffer.length) {
         tmp = ROL((~(buffer(i) - 0x48)).toByte, len & 0xFF)
         save = tmp
         tmp = ROR(((xorKey ^ tmp) - len).toByte, 3)
@@ -137,7 +137,7 @@ class CipherHelper(final val client: Client) {
     }
   }
 
-  private def encryptShanda(buffer: Array[Byte]): Unit = {
+  private[Crypto] def encryptShanda(buffer: Array[Byte]): Unit = {
     var xorKey: Byte = 0
     var save: Byte = 0
     var len: Byte = 0
@@ -176,7 +176,7 @@ class CipherHelper(final val client: Client) {
     (tmp | tmp >>> 8).toByte
   }
 
-  private def shuffle(vector: Int): Int = {
+  private[Crypto] def shuffle(vector: Int): Int = {
     var holder: Int = DefaultKey
     val pIv = getHolder(vector)
     var pKey = getHolder(holder)

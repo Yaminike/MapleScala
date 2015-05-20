@@ -23,22 +23,47 @@ class PacketWriter {
   private final val byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN
   private final val buffer = new ByteStringBuilder()
 
-  def write(v: Byte): Unit = buffer.putByte(v)
+  def write(v: Boolean): PacketWriter = {
+    if (v)
+      write(1.toByte)
+    else
+      write(0.toByte)
+  }
 
-  def write(v: Short): Unit = buffer.putShort(v)(byteOrder)
+  def write(v: Byte): PacketWriter = {
+    buffer.putByte(v)
+    this
+  }
 
-  def write(v: Int): Unit = buffer.putInt(v)(byteOrder)
+  def write(v: Short): PacketWriter = {
+    buffer.putShort(v)(byteOrder)
+    this
+  }
 
-  def write(v: Long): Unit = buffer.putLong(v)(byteOrder)
+  def write(v: Int): PacketWriter = {
+    buffer.putInt(v)(byteOrder)
+    this
+  }
 
-  def write(v: Array[Byte]): Unit = buffer.putBytes(v)
+  def write(v: Long): PacketWriter = {
+    buffer.putLong(v)(byteOrder)
+    this
+  }
 
-  def write(i: MapleString): Unit = {
+  def write(v: Array[Byte]): PacketWriter = {
+    buffer.putBytes(v)
+    this
+  }
+
+  def write(i: MapleString): PacketWriter = {
     write(i.value.length.toShort)
     write(i.value)
   }
 
-  def write(v: String): Unit = buffer.putBytes(v.getBytes)
+  def write(v: String): PacketWriter =  {
+    buffer.putBytes(v.getBytes)
+    this
+  }
 
   def result: ByteString = buffer.result()
 }

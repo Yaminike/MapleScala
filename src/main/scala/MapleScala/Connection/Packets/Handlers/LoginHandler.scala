@@ -1,7 +1,7 @@
 package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.PacketReader
+import MapleScala.Connection.Packets._
 
 /**
  * Copyright 2015 Yaminike
@@ -23,5 +23,23 @@ object LoginHandler {
     val login: String = packet.readMapleString
     val password: String = packet.readMapleString
     println(login + ":" + password)
+
+    val pw = new PacketWriter()
+      .write(SendOpcode.LOGIN_STATUS)
+      .write(0)
+      .write(0.toShort)
+      .write(0) // Account Id
+      .write(0.toByte) // Gender
+      .write(false) // IsGM
+      .write(0x80) // GMLevel? o-O
+      .write(new MapleString("Herp")) // Account Name
+      .write(0.toByte)
+      .write(false) // IsQuietBanned
+      .write(0L) // QuestBannedTime
+      .write(0L) // CreationTime?
+      .write(0)
+      .write(2.toShort) // PIN mode
+
+    client.self ! pw
   }
 }

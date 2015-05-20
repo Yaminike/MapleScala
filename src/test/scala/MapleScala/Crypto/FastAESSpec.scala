@@ -48,8 +48,9 @@ class FastAESSpec extends FlatSpec with Matchers {
   "transform" should "validate" in {
     val buffer: Array[Int] = new Array(4)
     val result: ByteBuffer = ByteBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN)
-    FastAES.TransformBlock(buffer)
+    for (i <- 0 until 10)
+      FastAES.TransformBlock(buffer)
     buffer.foreach(result.putInt)
-    MapleScala.Helper.toHex(result.array()) should be("01 62 24 5F 02 43 43 E2 F7 C0 F9 57 27 7C 44 3E")
+    MapleScala.Helper.toHex(result.array()) should be("EC EB 61 6F 25 0A 15 A1 8D 1A 3B 80 EC 5E 49 36")
   }
 }

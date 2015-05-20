@@ -32,16 +32,11 @@ class Client(val connection: ActorRef) extends Actor {
   import Tcp._
 
   private final val cipher = new CipherHelper(this)
-  private var handshaken = false
   handshake
 
   def receive = {
     case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
-    case Received(data) =>
-      if (handshaken) // We need to skip the first packet from decryption, we could check for sanity I guess
-        PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
-      else
-        handshaken = true
+    case Received(data) => PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
     case _: ConnectionClosed => disconnect
   }
 
