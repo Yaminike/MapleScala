@@ -15,11 +15,11 @@ package MapleScala.Connection.Packets
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object SendOpcode {
+object RecvOpcode {
+  final val FORCE_DISCONNECT: Short = 0x0000
   final val LOGIN_PASSWORD: Short = 0x0001
   final val MAP_LOGIN: Short = 0x0023
 }
 
-object RecvOpcode {
-
+object SendOpcode {
 }

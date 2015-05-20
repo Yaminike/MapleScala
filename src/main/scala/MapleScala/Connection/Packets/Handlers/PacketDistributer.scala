@@ -2,7 +2,7 @@ package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
-import MapleScala.Connection.Packets.SendOpcode._
+import MapleScala.Connection.Packets.RecvOpcode._
 
 /**
  * Copyright 2015 Yaminike
@@ -25,7 +25,9 @@ object PacketDistributer {
     header match {
       case LOGIN_PASSWORD => LoginHandler.handle(packet, client)
       case MAP_LOGIN => client.setActive
-      case other => println(f"Handler not found for $other%04X")
+
+      case FORCE_DISCONNECT => println("WARNING: Force disconnected a client")
+      case other => println(f"Handler not found for 0x$other%04X")
     }
   }
 }

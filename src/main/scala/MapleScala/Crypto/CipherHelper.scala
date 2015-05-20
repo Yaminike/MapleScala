@@ -30,12 +30,6 @@ class CipherHelper(final val client: Client) {
 
   // TODO: multiple packet support?
   def decrypt(in: ByteBuffer): PacketReader = {
-    // Validate the packet header
-    if (!checkPacketHeader(in.getShort(0)) && client != null) {
-      client.connection ! Abort
-      return new PacketReader(ByteBuffer.allocate(2))
-    }
-
     in.clear() // resets the position
 
     // Copy to new array
@@ -110,12 +104,6 @@ class CipherHelper(final val client: Client) {
     val left = (-(GameVersion + 1) ^ ((SIV << 16) >>> 16)).toShort
     val right = (left ^ data.length).toShort
     (left << 16) | right
-  }
-
-  private def checkPacketHeader(left: Short): Boolean = {
-    val i1 = (left ^ ((RIV << 16) >>> 16)).toShort
-    val i2 = GameVersion
-    i2 == i1
   }
 
   private def decryptShanda(buffer: Array[Byte]): Unit = {
