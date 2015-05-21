@@ -1,7 +1,9 @@
 package MapleScala
 
 import MapleScala.Connection.Server
-import akka.actor._
+import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
+import scalikejdbc._
 
 /**
  * Copyright 2015 Yaminike
@@ -19,10 +21,27 @@ import akka.actor._
  * limitations under the License.
  */
 object Main extends App {
+  final lazy val conf = ConfigFactory.load()
 
   override def main(args: Array[String]): Unit = {
+    initDB
+
     val system = ActorSystem("MapleScala")
     system.actorOf(Server.create(8484), "server-login")
+  }
+
+  def initDB: Unit ={
+    Class.forName(conf.getString("db.driver"))
+
+    val settings = ConnectionPoolSettings(
+      initialSize = conf.getInt("db.poolInitialSize"),
+      maxSize = conf.getInt("db.poolMaxSize"),
+      connectionTimeoutMillis = conf.getLong("db.poolConnectionTimeoutMillis"),
+      validationQuery = conf.getString("db.poolValidationQuery"),
+      connectionPoolFactoryName = conf.getString("db.poolFactoryName")
+    )
+
+    ConnectionPool.singleton(conf.getString("db.url"), conf.getString("db.user"), conf.getString("db.password"), settings)
   }
 }
 
