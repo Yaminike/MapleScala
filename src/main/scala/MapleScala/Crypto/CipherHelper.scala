@@ -4,6 +4,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
+import akka.io.Tcp.Abort
 import akka.util.{ByteString, ByteStringBuilder}
 
 /**
@@ -25,14 +26,23 @@ class CipherHelper(final val client: Client) {
   @volatile final var RIV: Int = MapleScala.Helper.random.nextInt()
   @volatile final var SIV: Int = MapleScala.Helper.random.nextInt()
   private final val DefaultKey: Int = 0xC65053F2
-  private final val GameVersion = 83
+  private final val GameVersion: Short = 83
 
   // TODO: multiple packet support?
   def decrypt(in: ByteBuffer): PacketReader = {
     in.position(0) // resets the position
+    in.order(ByteOrder.LITTLE_ENDIAN) // Maple uses little endian
+
+    // Check the packet header
+    val left: Short = in.getShort
+    if (!checkPacketHeader(left) && client != null) {
+      client.connection ! Abort
+      println("Invalid packet header found, disconnecting the client")
+      return null
+    }
 
     // Copy to new array
-    val length: Int = getPacketLength(in.getShort, in.getShort)
+    val length: Int = getPacketLength(left, in.getShort)
     val result: Array[Byte] = new Array[Byte](length)
     in.get(result)
 
@@ -53,7 +63,7 @@ class CipherHelper(final val client: Client) {
 
     // Create packetheader
     val header = new ByteStringBuilder
-    setPacketHeader(header, data)
+    setPacketHeader(header, data.length)
 
     // Shanda transform
     encryptShanda(data)
@@ -94,17 +104,15 @@ class CipherHelper(final val client: Client) {
     }
   }
 
-  private def getPacketLength(left: Short, right: Short): Int = {
-    val tmp = left ^ right
-    ((tmp << 8) & 0xFF00) | ((tmp >>> 8) & 0xFF)
+  private def getPacketLength(left: Short, right: Short): Int = left ^ right
+
+  private def setPacketHeader(buffer: ByteStringBuilder, length: Int): Unit = {
+    val iiv = ((SIV >>> 16) & 0xFFFF ) ^ (0xFFFF - GameVersion).toShort
+    buffer.putShort(iiv)(ByteOrder.LITTLE_ENDIAN)
+    buffer.putShort(length ^ iiv)(ByteOrder.LITTLE_ENDIAN)
   }
 
-  private def setPacketHeader(buffer: ByteStringBuilder, data: Array[Byte]): Unit = {
-    val left = (-(GameVersion + 1) ^ ((SIV << 16) >>> 16)) & 0xFFFF
-    val right = (left ^ data.length) & 0xFFFF
-    buffer.putShort(left)(ByteOrder.LITTLE_ENDIAN)
-    buffer.putShort(right)(ByteOrder.LITTLE_ENDIAN)
-  }
+  private def checkPacketHeader(left: Short): Boolean = (((RIV >>> 16) & 0xFFFF) ^ GameVersion).toShort == left
 
   private[Crypto] def decryptShanda(buffer: Array[Byte]): Unit = {
     var xorKey: Byte = 0
@@ -126,7 +134,7 @@ class CipherHelper(final val client: Client) {
 
       xorKey = 0
       len = (buffer.length & 0xFF).toByte
-      for (i <- 0 until buffer.length) {
+      for (i <- buffer.indices) {
         tmp = ROL((~(buffer(i) - 0x48)).toByte, len & 0xFF)
         save = tmp
         tmp = ROR(((xorKey ^ tmp) - len).toByte, 3)
@@ -206,10 +214,10 @@ class CipherHelper(final val client: Client) {
   private def setHolder(array: Array[Byte]): Int = ((array(3) & 0xFF) << 24) | ((array(2) & 0xFF) << 16) | ((array(1) & 0xFF) << 8) | (array(0) & 0xFF)
 
   private def getTable(byte: Byte): Byte = {
-    var index: Int = byte
-    if (index < 0)
-      index = 0x100 + index
-    Table(index)
+    if (byte < 0)
+      Table(0x100 + byte)
+    else
+      Table(byte)
   }
 
   private final val Table: Array[Byte] = Array(

@@ -1,7 +1,7 @@
 package MapleScala.Connection
 
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
-import MapleScala.Connection.Packets.{MapleString, PacketWriter}
+import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io._
@@ -41,7 +41,10 @@ class Client(val connection: ActorRef) extends Actor {
   }
 
   def setActive = {
-    //TODO: think of what to do here
+    // TODO: Ping/Pong
+    val pw = new PacketWriter()
+      .write(SendOpcode.PING)
+    self ! pw
   }
 
   private def disconnect = {

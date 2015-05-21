@@ -1,6 +1,9 @@
 package MapleScala.Crypto
 
+import java.nio.ByteBuffer
+
 import MapleScala.Connection.Packets.{MapleString, PacketWriter}
+import akka.util.ByteStringBuilder
 import org.scalatest._
 
 /**

@@ -24,4 +24,5 @@ object RecvOpcode {
 
 object SendOpcode {
   final val LOGIN_STATUS: Short = 0x0000
+  final val PING: Short = 0x0011
 }

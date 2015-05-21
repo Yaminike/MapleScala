@@ -22,7 +22,6 @@ object LoginHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
     val login: String = packet.readMapleString
     val password: String = packet.readMapleString
-    println(login + ":" + password)
 
     val pw = new PacketWriter()
       .write(SendOpcode.LOGIN_STATUS)
