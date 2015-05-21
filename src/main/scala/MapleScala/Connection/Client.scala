@@ -32,27 +32,27 @@ class Client(val connection: ActorRef) extends Actor {
   import Tcp._
 
   private final val cipher = new CipherHelper(this)
-  handshake
+  handshake()
 
   def receive = {
     case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
     case Received(data) => PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
-    case _: ConnectionClosed => disconnect
+    case _: ConnectionClosed => disconnect()
   }
 
-  def setActive = {
+  def setActive() = {
     // TODO: Ping/Pong
     val pw = new PacketWriter()
       .write(SendOpcode.PING)
     self ! pw
   }
 
-  private def disconnect = {
+  private def disconnect() = {
     context.stop(self)
     println("Disconnected") // TODO: Remove
   }
 
-  private def handshake = {
+  private def handshake() = {
     val pw = new PacketWriter()
     pw.write(0x0E.toShort)
     pw.write(83.toShort) // Version

@@ -107,7 +107,7 @@ class CipherHelper(final val client: Client) {
   private def getPacketLength(left: Short, right: Short): Int = left ^ right
 
   private def setPacketHeader(buffer: ByteStringBuilder, length: Int): Unit = {
-    val iiv = ((SIV >>> 16) & 0xFFFF ) ^ (0xFFFF - GameVersion).toShort
+    val iiv = ((SIV >>> 16) & 0xFFFF) ^ (0xFFFF - GameVersion).toShort
     buffer.putShort(iiv)(ByteOrder.LITTLE_ENDIAN)
     buffer.putShort(length ^ iiv)(ByteOrder.LITTLE_ENDIAN)
   }

@@ -24,13 +24,13 @@ object Main extends App {
   final lazy val conf = ConfigFactory.load()
 
   override def main(args: Array[String]): Unit = {
-    initDB
+    initDB()
 
     val system = ActorSystem("MapleScala")
     system.actorOf(Server.create(8484), "server-login")
   }
 
-  def initDB: Unit ={
+  def initDB() = {
     Class.forName(conf.getString("db.driver"))
 
     val settings = ConnectionPoolSettings(

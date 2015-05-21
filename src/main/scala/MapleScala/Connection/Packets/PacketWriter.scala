@@ -60,7 +60,7 @@ class PacketWriter {
     write(i.value)
   }
 
-  def write(v: String): PacketWriter =  {
+  def write(v: String): PacketWriter = {
     buffer.putBytes(v.getBytes)
     this
   }

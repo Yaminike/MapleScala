@@ -28,9 +28,9 @@ object User extends SQLSyntaxSupport[User] {
   def apply(rs: WrappedResultSet): User =
     new User(rs.int("id"), rs.string("name"), rs.string("password"), rs.boolean("isGM"))
 
-  def getById(id: Int): User = sql"SELECT * FROM users WHERE id = ${id}"
+  def getById(id: Int): User = sql"SELECT * FROM users WHERE id = $id"
     .map(rs => User(rs)).single().apply.orNull
 
-  def getByName(name: String): User = sql"SELECT * FROM users WHERE name = ${name}"
+  def getByName(name: String): User = sql"SELECT * FROM users WHERE name = $name"
     .map(rs => User(rs)).single().apply.orNull
 }

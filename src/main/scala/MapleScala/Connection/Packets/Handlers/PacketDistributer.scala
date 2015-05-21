@@ -25,7 +25,7 @@ object PacketDistributer {
     header match {
       case LOGIN_PASSWORD => LoginHandler.handle(packet, client)
       case CLIENT_START_ERROR =>
-      case MAP_LOGIN => client.setActive
+      case MAP_LOGIN => client.setActive()
 
       case FORCE_DISCONNECT => println("WARNING: Force disconnected a client")
       case other => println(f"Handler not found for 0x$other%04X")

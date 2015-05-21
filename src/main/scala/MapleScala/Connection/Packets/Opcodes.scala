@@ -18,6 +18,8 @@ package MapleScala.Connection.Packets
 object RecvOpcode {
   final val FORCE_DISCONNECT: Short = 0x0000
   final val LOGIN_PASSWORD: Short = 0x0001
+  final val AFTER_LOGIN: Short = 0x0009
+  final val PONG: Short = 0x0018
   final val CLIENT_START_ERROR: Short = 0x0019
   final val MAP_LOGIN: Short = 0x0023
 }

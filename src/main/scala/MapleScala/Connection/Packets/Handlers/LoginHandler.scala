@@ -24,18 +24,20 @@ object LoginHandler {
     val login: String = packet.readMapleString
     val user: User = User.getByName(login)
     if (user == null) {
-      // TODO: User not found
+      failedLogin(client, 5)
       return
     }
 
     val password: String = packet.readMapleString
-    if(!user.validatePassword(password)) {
-      // TODO: Invalid password
+    if (!user.validatePassword(password)) {
+      failedLogin(client, 4)
       return
     }
+
+    validLogin(user, client)
   }
 
-  def validLogin(user: User, client: Client): Unit ={
+  private def validLogin(user: User, client: Client): Unit = {
     val pw = new PacketWriter()
       .write(SendOpcode.LOGIN_STATUS)
       .write(0)
@@ -51,6 +53,33 @@ object LoginHandler {
       .write(0L) // CreationTime?
       .write(0)
       .write(2.toShort) // PIN mode
+
+    client.self ! pw
+  }
+
+  /*
+  Possible reasons:
+    3) ID deleted or blocked
+    4) Incorrect password
+    5) Not a registered id
+    6) System error
+    7) Already logged in
+    8,9) System error
+    10) Cannot process so many connections
+    11) Only users older than 20 can use this channel
+    13) Unable to log on as master at this ip
+    16) Please verify your account through email...
+    17) Wrong gateway or personal info
+    21) Please verify your account through email...
+    23) License agreement
+    25) Maple Europe region notice
+  */
+  private def failedLogin(client: Client, reason: Byte): Unit = {
+    val pw = new PacketWriter()
+      .write(SendOpcode.LOGIN_STATUS)
+      .write(reason)
+      .write(0.toByte)
+      .write(0)
 
     client.self ! pw
   }
