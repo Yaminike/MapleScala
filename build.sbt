@@ -13,3 +13,5 @@ libraryDependencies += "io.github.nremond" %% "pbkdf2-scala" % "0.5"
 libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.4"
 
 fork in run := true
+
+fork in run := true

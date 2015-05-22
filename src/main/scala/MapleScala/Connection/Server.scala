@@ -21,7 +21,7 @@ import akka.io._
  * limitations under the License.
  */
 object Server {
-  def create(port: Int): Props = Props(new Server(8484))
+  def create(port: Int): Props = Props(new Server(port))
 }
 
 class Server(port: Int) extends Actor {
@@ -29,7 +29,7 @@ class Server(port: Int) extends Actor {
   import Tcp._
   import context.system
 
-  IO(Tcp) ! Bind(self, new InetSocketAddress("0.0.0.0", port))
+  IO(Tcp) ! Bind(self, new InetSocketAddress(MapleScala.Main.conf.getString("server.ip"), port))
 
   override def receive = {
     case Bound(localAddress) =>
