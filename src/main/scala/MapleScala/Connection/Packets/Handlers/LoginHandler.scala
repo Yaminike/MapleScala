@@ -1,8 +1,13 @@
 package MapleScala.Connection.Packets.Handlers
 
+import MapleScala.Authorization.{AuthResponse, AuthRequest}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets._
 import MapleScala.Data.User
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
  * Copyright 2015 Yaminike
@@ -20,21 +25,25 @@ import MapleScala.Data.User
  * limitations under the License.
  */
 object LoginHandler {
+  implicit val timeout = Timeout(5 seconds)
+
   def handle(packet: PacketReader, client: Client): Unit = {
-    val login: String = packet.readMapleString
-    val user: User = User.getByName(login)
-    if (user == null) {
-      failedLogin(client, 5)
-      return
-    }
-
+    val username: String = packet.readMapleString
     val password: String = packet.readMapleString
-    if (!user.validatePassword(password)) {
-      failedLogin(client, 4)
-      return
-    }
-
-    validLogin(user, client)
+    
+    val authRequest = client.server ? new AuthRequest(username, password)
+    authRequest.onComplete({
+      case Success(result) =>
+        val response = result.asInstanceOf[AuthResponse]
+        if (response.result == 0) {
+          client.user = response.user
+          validLogin(response.user, client)
+        } else {
+          failedLogin(client, response.result)
+        }
+      case Failure(failure) =>
+        failedLogin(client, 6)
+    })(client.context.dispatcher)
   }
 
   private def validLogin(user: User, client: Client): Unit = {

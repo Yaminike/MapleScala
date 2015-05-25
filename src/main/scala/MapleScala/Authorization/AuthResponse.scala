@@ -1,4 +1,6 @@
-package MapleScala.Connection.Packets
+package MapleScala.Authorization
+
+import MapleScala.Data.User
 
 /**
  * Copyright 2015 Yaminike
@@ -15,20 +17,4 @@ package MapleScala.Connection.Packets
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object RecvOpcode {
-  final val FORCE_DISCONNECT: Short = 0x0000
-  final val LOGIN_PASSWORD: Short = 0x0001
-  final val AFTER_LOGIN: Short = 0x0009
-
-  final val PONG: Short = 0x0018
-  final val CLIENT_START_ERROR: Short = 0x0019
-
-  final val MAP_LOGIN: Short = 0x0023
-}
-
-object SendOpcode {
-  final val LOGIN_STATUS: Short = 0x0000
-  final val CHECK_PINCODE: Short = 0x0006
-
-  final val PING: Short = 0x0011
-}
+class AuthResponse (var result: Byte, val user: User)

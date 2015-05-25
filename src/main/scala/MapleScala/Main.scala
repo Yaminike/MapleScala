@@ -1,5 +1,6 @@
 package MapleScala
 
+import MapleScala.Authorization.AuthHandler
 import MapleScala.Connection.Server
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
@@ -27,7 +28,8 @@ object Main extends App {
     initDB()
 
     val system = ActorSystem("MapleScala")
-    system.actorOf(Server.create(conf.getInt("server.login.port")), "server-login")
+    val auth = system.actorOf(AuthHandler.create, "server-auth")
+    system.actorOf(Server.create(conf.getInt("server.login.port"), auth), "server-login")
   }
 
   def initDB() = {

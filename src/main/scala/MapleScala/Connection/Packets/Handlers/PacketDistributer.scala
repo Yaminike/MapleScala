@@ -24,6 +24,7 @@ object PacketDistributer {
     val header: Short = packet.readShort
     header match {
       case LOGIN_PASSWORD => LoginHandler.handle(packet, client)
+      case AFTER_LOGIN => AfterLoginHandler.handle(packet, client)
       case CLIENT_START_ERROR =>
       case MAP_LOGIN => client.setActive()
 

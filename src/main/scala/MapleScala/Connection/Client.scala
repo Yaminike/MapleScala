@@ -3,6 +3,7 @@ package MapleScala.Connection
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
+import MapleScala.Data.User
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io._
 
@@ -22,16 +23,18 @@ import akka.io._
  * limitations under the License.
  */
 object Client {
-  def create(connection: ActorRef): Props = Props(new Client(connection))
+  def create(connection: ActorRef, server: ActorRef): Props = Props(new Client(connection, server))
 }
 
-class Client(val connection: ActorRef) extends Actor {
+class Client(val connection: ActorRef, val server: ActorRef) extends Actor {
 
   class Send(val data: PacketWriter)
 
   import Tcp._
 
   private final val cipher = new CipherHelper(this)
+  var user: User = null
+
   handshake()
 
   def receive = {

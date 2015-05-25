@@ -18,6 +18,8 @@ import java.nio.ByteBuffer
  * limitations under the License.
  */
 class PacketReader(final val buffer: ByteBuffer) {
+  def readBool = buffer.get == 1
+
   def readByte = buffer.get
 
   def readShort = buffer.getShort
@@ -41,4 +43,6 @@ class PacketReader(final val buffer: ByteBuffer) {
   def reset = buffer.clear()
 
   def array = buffer.array()
+
+  def available = buffer.limit() - buffer.position()
 }
