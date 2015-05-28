@@ -18,15 +18,23 @@ import scalikejdbc._
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class User(val id: Int, val name: String, val password: String, val isGM: Boolean) {
+class User(val id: Int, val name: String, val password: String, val isGM: Boolean, var pin: Option[Int]) {
+  implicit val session = AutoSession
+
   def validatePassword(password: String): Boolean = SecureHash.validatePassword(password, this.password)
+
+  def validatePIN(pin: Int): Boolean = pin == this.pin.getOrElse(-1) // I figured hashing it would be utterly useless
+
+  def updateUser(): Unit = sql"UPDATE users SET name = $name, password = $password, isGM = $isGM, pin = $pin WHERE id = $id"
+    .update()
+    .apply()
 }
 
 object User extends SQLSyntaxSupport[User] {
   implicit val session = AutoSession
 
   def apply(rs: WrappedResultSet): User =
-    new User(rs.int("id"), rs.string("name"), rs.string("password"), rs.boolean("isGM"))
+    new User(rs.int("id"), rs.string("name"), rs.string("password"), rs.boolean("isGM"), rs.intOpt("pin"))
 
   def getById(id: Int): User = sql"SELECT * FROM users WHERE id = $id"
     .map(rs => User(rs)).single().apply.orNull

@@ -3,6 +3,7 @@ package MapleScala.Connection.Packets.Handlers
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
 import MapleScala.Connection.Packets.RecvOpcode._
+import akka.io.Tcp.Abort
 
 /**
  * Copyright 2015 Yaminike
@@ -22,14 +23,33 @@ import MapleScala.Connection.Packets.RecvOpcode._
 object PacketDistributer {
   def distribute(packet: PacketReader, client: Client): Unit = {
     val header: Short = packet.readShort
-    header match {
-      case LOGIN_PASSWORD => LoginHandler.handle(packet, client)
-      case AFTER_LOGIN => AfterLoginHandler.handle(packet, client)
-      case CLIENT_START_ERROR =>
-      case MAP_LOGIN => client.setActive()
 
-      case FORCE_DISCONNECT => println("WARNING: Force disconnected a client")
-      case other => println(f"Handler not found for 0x$other%04X")
+    if (client.user == null) {
+      header match {
+        // All these packets only occur when the user is logged in
+        case AfterLogin |
+             RegisterPin =>
+          client.connection ! Abort
+
+        // These packets can occur when the user is not logged in
+        case LoginPassword => LoginHandler.handle(packet, client)
+        case ClientStartError =>
+        case MapLogin => client.setActive()
+
+        case ForceDisconnect => println("WARNING: Force disconnected a client")
+        case other => println(f"Handler not found for 0x$other%04X")
+      }
+    } else {
+      header match {
+        case LoginPassword => LoginHandler.handle(packet, client)
+        case AfterLogin => AfterLoginHandler.handle(packet, client)
+        case RegisterPin => RegisterPinHandler.handle(packet, client)
+        case ClientStartError =>
+        case MapLogin => client.setActive()
+
+        case ForceDisconnect => println("WARNING: Force disconnected a client")
+        case other => println(f"Handler not found for 0x$other%04X")
+      }
     }
   }
 }

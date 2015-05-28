@@ -17,4 +17,12 @@ import MapleScala.Data.User
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class AuthResponse (var result: Byte, val user: User)
+object AuthResponse {
+
+  class Login(var result: Byte, val user: User)
+
+  class CheckLogin(val loggedin: Boolean)
+
+  class GetStatus(val status: AuthStatus.ValueSet)
+
+}

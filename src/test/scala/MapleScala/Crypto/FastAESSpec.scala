@@ -40,7 +40,7 @@ class FastAESSpec extends FlatSpec with Matchers {
       0x006363CB, 0x63FBFB6A,
       0x02FB0FB1, 0x770F7695
     )
-    for (i <- 0 until expected.length) {
+    for (i <- expected.indices) {
       wk(i)(3) should be(expected(i))
     }
   }

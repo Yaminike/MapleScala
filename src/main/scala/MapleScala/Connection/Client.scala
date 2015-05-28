@@ -1,5 +1,6 @@
 package MapleScala.Connection
 
+import MapleScala.Authorization.AuthRequest
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
@@ -46,11 +47,19 @@ class Client(val connection: ActorRef, val server: ActorRef) extends Actor {
   def setActive() = {
     // TODO: Ping/Pong
     val pw = new PacketWriter()
-      .write(SendOpcode.PING)
+      .write(SendOpcode.Ping)
     self ! pw
   }
 
+  def logout() = {
+    if (user != null) {
+      server ! new AuthRequest.Logout(user.id)
+      user = null
+    }
+  }
+
   private def disconnect() = {
+    logout()
     context.stop(self)
     println("Disconnected") // TODO: Remove
   }

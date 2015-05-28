@@ -2,12 +2,8 @@ package MapleScala.Connection
 
 import java.net.InetSocketAddress
 
-import MapleScala.Authorization.AuthRequest
 import akka.actor._
 import akka.io._
-import akka.pattern.pipe
-
-import scala.concurrent.Future
 
 /**
  * Copyright 2015 Yaminike
@@ -36,8 +32,6 @@ class Server(port: Int, auth: ActorRef) extends Actor {
   IO(Tcp) ! Bind(self, new InetSocketAddress(MapleScala.Main.conf.getString("server.ip"), port))
 
   override def receive = {
-    case ar: AuthRequest =>
-      auth.forward(ar)
     case Bound(localAddress) =>
       println(s"Server is running on ${localAddress.getPort}")
     case CommandFailed(_: Bind) =>
@@ -46,5 +40,6 @@ class Server(port: Int, auth: ActorRef) extends Actor {
     case Connected(remote, local) =>
       val handler = context.actorOf(Client.create(sender(), self))
       sender() ! Register(handler)
+    case x => auth.forward(x) // TODO: Find an alternative to this
   }
 }

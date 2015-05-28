@@ -15,4 +15,16 @@ package MapleScala.Authorization
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class AuthRequest (val username: String, val password: String)
+object AuthRequest {
+
+  class Login(val username: String, val password: String)
+
+  class Logout(val id: Int)
+
+  class CheckLogin(val id: Int)
+
+  class GetStatus(val id: Int)
+
+  class SetStatus(val id: Int, val status: AuthStatus.AuthStatus)
+
+}

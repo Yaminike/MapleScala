@@ -1,6 +1,4 @@
-package MapleScala
-
-import org.scalatest._
+package MapleScala.Authorization
 
 /**
  * Copyright 2015 Yaminike
@@ -17,13 +15,8 @@ import org.scalatest._
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class HelperSpec extends FlatSpec with Matchers {
-  "random" should "validate" in {
-    Helper.random should not be Helper.random
-  }
-
-  "toHex" should "validate" in {
-    val bytes: Array[Byte] = Array[Byte](1, 20, 30)
-    Helper.toHex(bytes) should be("01 14 1E")
-  }
+object AuthStatus extends Enumeration {
+  type AuthStatus = Value
+  val LoggedIn = Value(0x01)
+  val PinAccepted = Value(0x02)
 }

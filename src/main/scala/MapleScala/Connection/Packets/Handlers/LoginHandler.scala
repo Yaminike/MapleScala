@@ -1,11 +1,12 @@
 package MapleScala.Connection.Packets.Handlers
 
-import MapleScala.Authorization.{AuthResponse, AuthRequest}
+import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets._
 import MapleScala.Data.User
 import akka.pattern.ask
 import akka.util.Timeout
+
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -25,16 +26,16 @@ import scala.util.{Failure, Success}
  * limitations under the License.
  */
 object LoginHandler {
-  implicit val timeout = Timeout(5 seconds)
+  implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
     val username: String = packet.readMapleString
     val password: String = packet.readMapleString
-    
-    val authRequest = client.server ? new AuthRequest(username, password)
+
+    val authRequest = client.server ? new AuthRequest.Login(username, password)
     authRequest.onComplete({
       case Success(result) =>
-        val response = result.asInstanceOf[AuthResponse]
+        val response = result.asInstanceOf[AuthResponse.Login]
         if (response.result == 0) {
           client.user = response.user
           validLogin(response.user, client)
@@ -48,7 +49,7 @@ object LoginHandler {
 
   private def validLogin(user: User, client: Client): Unit = {
     val pw = new PacketWriter()
-      .write(SendOpcode.LOGIN_STATUS)
+      .write(SendOpcode.LoginStatus)
       .write(0)
       .write(0.toShort)
       .write(user.id) // Account Id
@@ -85,7 +86,7 @@ object LoginHandler {
   */
   private def failedLogin(client: Client, reason: Byte): Unit = {
     val pw = new PacketWriter()
-      .write(SendOpcode.LOGIN_STATUS)
+      .write(SendOpcode.LoginStatus)
       .write(reason)
       .write(0.toByte)
       .write(0)

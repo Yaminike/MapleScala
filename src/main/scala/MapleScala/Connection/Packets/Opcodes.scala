@@ -16,19 +16,22 @@ package MapleScala.Connection.Packets
  * limitations under the License.
  */
 object RecvOpcode {
-  final val FORCE_DISCONNECT: Short = 0x0000
-  final val LOGIN_PASSWORD: Short = 0x0001
-  final val AFTER_LOGIN: Short = 0x0009
+  final val ForceDisconnect: Short = 0x0000
+  final val LoginPassword: Short = 0x0001
+  final val AfterLogin: Short = 0x0009
+  final val RegisterPin: Short = 0x000A
+  final val ServerlistRequest: Short = 0x000B
 
-  final val PONG: Short = 0x0018
-  final val CLIENT_START_ERROR: Short = 0x0019
+  final val Pong: Short = 0x0018
+  final val ClientStartError: Short = 0x0019
 
-  final val MAP_LOGIN: Short = 0x0023
+  final val MapLogin: Short = 0x0023
 }
 
 object SendOpcode {
-  final val LOGIN_STATUS: Short = 0x0000
-  final val CHECK_PINCODE: Short = 0x0006
+  final val LoginStatus: Short = 0x0000
+  final val CheckPin: Short = 0x0006
+  final val UpdatePin: Short = 0x0007
 
-  final val PING: Short = 0x0011
+  final val Ping: Short = 0x0011
 }

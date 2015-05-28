@@ -1,8 +1,13 @@
 package MapleScala.Connection.Packets.Handlers
 
+import MapleScala.Authorization.{AuthRequest, AuthStatus}
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
-import akka.io.Tcp.Abort
+import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
  * Copyright 2015 Yaminike
@@ -20,13 +25,9 @@ import akka.io.Tcp.Abort
  * limitations under the License.
  */
 object AfterLoginHandler {
-  def handle(packet: PacketReader, client: Client): Unit = {
-    if (client.user == null) {
-      // Not logged in
-      client.connection ! Abort
-      return
-    }
+  implicit val timeout = Timeout(5.seconds)
 
+  def handle(packet: PacketReader, client: Client): Unit = {
     val step = packet.readByte
     var state: Byte = -1
     if (packet.available > 0)
@@ -36,36 +37,50 @@ object AfterLoginHandler {
       case 0 =>
         if (state == -1) {
           // Cancel
-          client.user == null
+          client.logout()
         }
       case 1 =>
         if (state == 0) {
           val pin = packet.readMapleString
-          println(s"test1 $pin")
+          if (pin.forall(_.isDigit) && client.user.validatePIN(pin.toInt)) {
+            val authRequest = client.server ? new AuthRequest.SetStatus(client.user.id, AuthStatus.PinAccepted)
+            authRequest.onComplete({
+              case Success(result) => pinOperation(client, Reasons.Accept)
+              case Failure(failure) => pinOperation(client, Reasons.RequestAfterFailure)
+            })(client.context.dispatcher)
+          } else {
+            pinOperation(client, Reasons.RequestAfterFailure)
+          }
         } else if (state == 1) {
-          // TODO: Register
-          pinOperation(client, Reasons.REQUEST)
+          if (client.user.pin.nonEmpty)
+            pinOperation(client, Reasons.Request)
+          else
+            pinOperation(client, Reasons.Register)
         }
       case 2 =>
         if (state == 0) {
           val pin = packet.readMapleString
-          println(s"test2 $pin")
+          if (pin.forall(_.isDigit) && client.user.validatePIN(pin.toInt))
+            pinOperation(client, Reasons.Register)
+          else
+            pinOperation(client, Reasons.RequestAfterFailure)
         }
     }
   }
 
   private def pinOperation(client: Client, reason: Byte): Unit = {
     val pw = new PacketWriter()
-      .write(SendOpcode.CHECK_PINCODE)
+      .write(SendOpcode.CheckPin)
       .write(reason)
 
     client.self ! pw
   }
 
   private object Reasons {
-    final val REQUEST: Byte = 0x04
-    final val REQUEST_AFTER_FAILURE: Byte = 0x02
-    final val REGISTER: Byte = 0x01
-    final val ACCEPT: Byte = 0x00
+    final val Request: Byte = 0x04
+    final val RequestAfterFailure: Byte = 0x02
+    final val Register: Byte = 0x01
+    final val Accept: Byte = 0x00
   }
+
 }
