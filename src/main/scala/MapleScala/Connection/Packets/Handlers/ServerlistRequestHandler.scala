@@ -47,14 +47,14 @@ object ServerlistRequestHandler extends PacketHandler {
       .write(0.toByte)
       .write(channel) // Channel count
 
-    for (i <- 0 to channel) {
+    for (i <- 0 until channel) {
       pw.write(new MapleString(s"$world-${i + 1}"))
         .write(0) // TODO: Channel load
         .write(true)
         .write(i.toShort)
     }
     
-    pw.empty(0.toShort)
+    pw.empty(2)
 
     client.self ! pw
   }
