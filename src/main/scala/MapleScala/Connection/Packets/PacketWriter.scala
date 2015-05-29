@@ -65,5 +65,10 @@ class PacketWriter {
     this
   }
 
+  def empty(count: Int): PacketWriter = {
+    buffer.putBytes(new Array[Byte](count))
+    this
+  }
+
   def result: ByteString = buffer.result()
 }

@@ -34,7 +34,8 @@ object PacketDistributer {
   // These packets only occur when the user is logged in
   final lazy val handlers: immutable.HashMap[Short, PacketHandler] = immutable.HashMap(
     AfterLogin -> AfterLoginHandler,
-    RegisterPin -> RegisterPinHandler
+    RegisterPin -> RegisterPinHandler,
+    ServerlistRequest -> ServerlistRequestHandler
   )
 
   def distribute(packet: PacketReader, client: Client): Unit = {

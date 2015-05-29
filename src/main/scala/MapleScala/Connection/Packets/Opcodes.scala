@@ -31,6 +31,7 @@ object SendOpcode {
   final val LoginStatus: Short = 0x0000
   final val CheckPin: Short = 0x0006
   final val UpdatePin: Short = 0x0007
+  final val Serverlist: Short = 0x000A
 
   final val Ping: Short = 0x0011
 }

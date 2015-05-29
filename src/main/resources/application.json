@@ -1,0 +1,23 @@
+{
+  "server": {
+    "ip": "0.0.0.0",
+    "login" : {
+      "port": 8484
+    },
+    "worlds": {
+      "names": ["MapleScala", "Test"],
+      "channels": [10, 5]
+    }
+  },
+  "db": {
+    "driver": "com.mysql.jdbc.Driver",
+    "url": "jdbc:mysql://127.0.0.1/MapleScala",
+    "user": "MapleScala",
+    "password": "MapleScala",
+    "poolInitialSize": 10,
+    "poolMaxSize": 20,
+    "poolConnectionTimeoutMillis": 1000,
+    "poolValidationQuery": "select 1 as one",
+    "poolFactoryName": "commons-dbcp"
+  }
+}
