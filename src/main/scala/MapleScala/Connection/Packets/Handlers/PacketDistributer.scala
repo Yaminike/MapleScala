@@ -5,6 +5,8 @@ import MapleScala.Connection.Packets.PacketReader
 import MapleScala.Connection.Packets.RecvOpcode._
 import akka.io.Tcp.Abort
 
+import scala.collection.immutable
+
 /**
  * Copyright 2015 Yaminike
  *
@@ -21,35 +23,32 @@ import akka.io.Tcp.Abort
  * limitations under the License.
  */
 object PacketDistributer {
+  // These packets do not require the user to be logged in
+  final lazy val defaultHandlers: immutable.HashMap[Short, PacketHandler] = immutable.HashMap(
+    LoginPassword -> LoginHandler,
+    ClientStartError -> EmptyHandler,
+    MapLogin -> MapLoginHandler,
+    Pong -> EmptyHandler
+  )
+
+  // These packets only occur when the user is logged in
+  final lazy val handlers: immutable.HashMap[Short, PacketHandler] = immutable.HashMap(
+    AfterLogin -> AfterLoginHandler,
+    RegisterPin -> RegisterPinHandler
+  )
+
   def distribute(packet: PacketReader, client: Client): Unit = {
     val header: Short = packet.readShort
 
-    if (client.user == null) {
-      header match {
-        // All these packets only occur when the user is logged in
-        case AfterLogin |
-             RegisterPin =>
-          client.connection ! Abort
-
-        // These packets can occur when the user is not logged in
-        case LoginPassword => LoginHandler.handle(packet, client)
-        case ClientStartError =>
-        case MapLogin => client.setActive()
-
-        case ForceDisconnect => println("WARNING: Force disconnected a client")
-        case other => println(f"Handler not found for 0x$other%04X")
-      }
+    if (handlers.contains(header)) {
+      if (client.user == null)
+        client.connection ! Abort
+      else
+        handlers.get(header).get.handle(packet, client)
+    } else if (defaultHandlers.contains(header)) {
+      defaultHandlers.get(header).get.handle(packet, client)
     } else {
-      header match {
-        case LoginPassword => LoginHandler.handle(packet, client)
-        case AfterLogin => AfterLoginHandler.handle(packet, client)
-        case RegisterPin => RegisterPinHandler.handle(packet, client)
-        case ClientStartError =>
-        case MapLogin => client.setActive()
-
-        case ForceDisconnect => println("WARNING: Force disconnected a client")
-        case other => println(f"Handler not found for 0x$other%04X")
-      }
+      println(f"Handler not found for 0x$header%04X")
     }
   }
 }

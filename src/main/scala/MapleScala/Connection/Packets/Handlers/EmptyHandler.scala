@@ -1,4 +1,7 @@
-package MapleScala.Connection.Packets
+package MapleScala.Connection.Packets.Handlers
+
+import MapleScala.Connection.Client
+import MapleScala.Connection.Packets.PacketReader
 
 /**
  * Copyright 2015 Yaminike
@@ -15,22 +18,6 @@ package MapleScala.Connection.Packets
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object RecvOpcode {
-  final val LoginPassword: Short = 0x0001
-  final val AfterLogin: Short = 0x0009
-  final val RegisterPin: Short = 0x000A
-  final val ServerlistRequest: Short = 0x000B
-
-  final val Pong: Short = 0x0018
-  final val ClientStartError: Short = 0x0019
-
-  final val MapLogin: Short = 0x0023
-}
-
-object SendOpcode {
-  final val LoginStatus: Short = 0x0000
-  final val CheckPin: Short = 0x0006
-  final val UpdatePin: Short = 0x0007
-
-  final val Ping: Short = 0x0011
+object EmptyHandler extends PacketHandler {
+  def handle(packet: PacketReader, client: Client): Unit = {}
 }

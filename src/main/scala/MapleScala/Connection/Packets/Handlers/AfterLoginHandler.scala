@@ -24,7 +24,7 @@ import scala.util.{Failure, Success}
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object AfterLoginHandler {
+object AfterLoginHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
