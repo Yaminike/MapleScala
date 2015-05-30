@@ -1,12 +1,20 @@
 {
   "server": {
     "ip": "0.0.0.0",
-    "login" : {
-      "port": 8484
+    "ports": {
+      "login": 8484,
+      "channel": 8485
     },
     "worlds": {
-      "names": ["MapleScala", "Test"],
-      "channels": [10, 5]
+      "default": 0,
+      "names": [
+        "MapleScala",
+        "Test"
+      ],
+      "channels": [
+        10,
+        5
+      ]
     }
   },
   "db": {

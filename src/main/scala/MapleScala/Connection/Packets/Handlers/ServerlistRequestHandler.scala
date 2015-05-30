@@ -1,10 +1,10 @@
 package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{MapleString, SendOpcode, PacketWriter, PacketReader}
+import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
 import MapleScala.Main
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 /**
  * Copyright 2015 Yaminike
@@ -24,11 +24,13 @@ import collection.JavaConversions._
 object ServerlistRequestHandler extends PacketHandler {
   final val worlds = Main.conf.getStringList("server.worlds.names").toList
   final val channels = Main.conf.getIntList("server.worlds.channels").toList
+  final val defaultWorld = Main.conf.getInt("server.worlds.default")
 
   def handle(packet: PacketReader, client: Client): Unit = {
     for (world <- worlds)
       createServerlist(client, world)
     endServerlist(client)
+    selectDefaultWorld(client)
   }
 
   private def createServerlist(client: Client, world: String): Unit = {
@@ -53,7 +55,7 @@ object ServerlistRequestHandler extends PacketHandler {
         .write(true)
         .write(i.toShort)
     }
-    
+
     pw.empty(2)
 
     client.self ! pw
@@ -63,6 +65,14 @@ object ServerlistRequestHandler extends PacketHandler {
     val pw = new PacketWriter()
       .write(SendOpcode.Serverlist)
       .write(0xFF.toByte)
+
+    client.self ! pw
+  }
+
+  private def selectDefaultWorld(client: Client): Unit = {
+    val pw = new PacketWriter()
+      .write(SendOpcode.DefaultWorld)
+      .write(defaultWorld)
 
     client.self ! pw
   }

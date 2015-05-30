@@ -49,7 +49,7 @@ object LoginHandler extends PacketHandler {
 
   private def validLogin(user: User, client: Client): Unit = {
     val pw = new PacketWriter()
-      .write(SendOpcode.LoginStatus)
+      .write(SendOpcode.Loginstatus)
       .write(0)
       .write(0.toShort)
       .write(user.id) // Account Id
@@ -86,7 +86,7 @@ object LoginHandler extends PacketHandler {
   */
   private def failedLogin(client: Client, reason: Byte): Unit = {
     val pw = new PacketWriter()
-      .write(SendOpcode.LoginStatus)
+      .write(SendOpcode.Loginstatus)
       .write(reason)
       .write(0.toByte)
       .write(0)

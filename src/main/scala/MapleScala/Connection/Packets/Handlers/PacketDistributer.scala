@@ -33,6 +33,9 @@ object PacketDistributer {
 
   // These packets only occur when the user is logged in
   final lazy val handlers: immutable.HashMap[Short, PacketHandler] = immutable.HashMap(
+    ServerlistReRequest -> ServerlistRequestHandler,
+    CharlistRequest -> CharlistRequestHandler,
+    ServerstatusRequest -> ServerstatusRequestHandler,
     AfterLogin -> AfterLoginHandler,
     RegisterPin -> RegisterPinHandler,
     ServerlistRequest -> ServerlistRequestHandler

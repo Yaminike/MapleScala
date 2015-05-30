@@ -17,6 +17,9 @@ package MapleScala.Connection.Packets
  */
 object RecvOpcode {
   final val LoginPassword: Short = 0x0001
+  final val ServerlistReRequest: Short = 0x0004
+  final val CharlistRequest: Short = 0x0005
+  final val ServerstatusRequest: Short = 0x0006
   final val AfterLogin: Short = 0x0009
   final val RegisterPin: Short = 0x000A
   final val ServerlistRequest: Short = 0x000B
@@ -28,10 +31,12 @@ object RecvOpcode {
 }
 
 object SendOpcode {
-  final val LoginStatus: Short = 0x0000
+  final val Loginstatus: Short = 0x0000
+  final val Serverstatus: Short = 0x0003
   final val CheckPin: Short = 0x0006
   final val UpdatePin: Short = 0x0007
   final val Serverlist: Short = 0x000A
 
   final val Ping: Short = 0x0011
+  final val DefaultWorld: Short = 0x001A
 }

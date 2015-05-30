@@ -29,7 +29,7 @@ object Main extends App {
 
     val system = ActorSystem("MapleScala")
     val auth = system.actorOf(AuthHandler.create, "server-auth")
-    system.actorOf(Server.create(conf.getInt("server.login.port"), auth), "server-login")
+    system.actorOf(Server.create(conf.getInt("server.ports.login"), auth), "server-login")
   }
 
   def initDB() = {
