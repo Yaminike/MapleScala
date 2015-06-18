@@ -29,6 +29,11 @@ class CipherHelper(final val client: Client) {
   private final val GameVersion: Short = 83
 
   // TODO: multiple packet support?
+  /**
+   * Decrypts data with the MapleCrypto
+   * @param in Data to decrypt
+   * @return Decrypted data
+   */
   def decrypt(in: ByteBuffer): PacketReader = {
     in.position(0) // resets the position
     in.order(ByteOrder.LITTLE_ENDIAN) // Maple uses little endian
@@ -57,6 +62,11 @@ class CipherHelper(final val client: Client) {
     new PacketReader(ByteBuffer.wrap(result).order(ByteOrder.LITTLE_ENDIAN))
   }
 
+  /**
+   * Encrypts data with the MapleCrypto
+   * @param in Data to encrypt
+   * @return Encrypted data
+   */
   def encrypt(in: ByteString): ByteString = {
     val data: Array[Byte] = new Array(in.length)
     in.copyToArray(data)
@@ -77,43 +87,84 @@ class CipherHelper(final val client: Client) {
     header.result()
   }
 
+  /**
+   * Transforms data with the custom MapleAES
+   * @param in Bytes to transform
+   * @param read Amount of bytes to transform
+   * @param vector Vector to apply
+   */
   private[Crypto] def transform(in: Array[Byte], read: Int, vector: Int): Unit = {
-    var length: Int = 0x5B0
+    var length: Int = 0x5B0 // The initial block size
     var start: Int = 0
     var cur: Int = 0
     var remaining: Int = read
     val realIV = new Array[Int](4)
 
     while (remaining > 0) {
+      // Re-fill the IV buffer
       for (i <- 0 until 4)
         realIV(i) = vector
 
+      // Check the amount of data left
       if (remaining < length)
         length = remaining
 
       for (i <- start until start + length) {
+        // Transform the IV buffer
         if ((i - start) % 16 == 0)
           FastAES.TransformBlock(realIV)
 
+        /*
+         As we handle the IVs as int, we need to shift out a single byte to XOR with
+         So we grab the index of cur / 4
+         And then when shift with cur % 4 * 8
+         For example;
+         realIV = { 0x11221122, 0x33443344, 0x55665566, 0x77887788 }
+         cur = 10;
+         cur % 4 * 8 = 2 * 8 = 16
+         cur / 4 = 2;
+         Thus we need the 3 third byte, out of the IV with index 2
+        */
         cur = (i - start) % 16
         in(i) = (in(i) ^ ((realIV(cur / 4) >>> (cur % 4 * 8)) & 0xFF)).toByte
       }
+
       start += length
       remaining -= length
-      length = 0x5B4
+      length = 0x5B4 // The block size
     }
   }
 
+  /**
+   * Gets the packet length which is stored in the packet header
+   * @param left The first short of a packet
+   * @param right The second short of a packet
+   * @return packet length
+   */
   private def getPacketLength(left: Short, right: Short): Int = left ^ right
 
+  /**
+   * Create a packet header to be send to the client
+   * @param buffer Buffer to write to
+   * @param length Data length
+   */
   private def setPacketHeader(buffer: ByteStringBuilder, length: Int): Unit = {
     val iiv = ((SIV >>> 16) & 0xFFFF) ^ (0xFFFF - GameVersion).toShort
     buffer.putShort(iiv)(ByteOrder.LITTLE_ENDIAN)
     buffer.putShort(length ^ iiv)(ByteOrder.LITTLE_ENDIAN)
   }
 
+  /**
+   * Checks if the packet header validates with the current IV
+   * @param left The first short of a packet
+   * @return True if valid
+   */
   private def checkPacketHeader(left: Short): Boolean = (((RIV >>> 16) & 0xFFFF) ^ GameVersion).toShort == left
 
+  /**
+   * Decrypts Maple their custom Shanda
+   * @param buffer Data to decrypt
+   */
   private[Crypto] def decryptShanda(buffer: Array[Byte]): Unit = {
     var xorKey: Byte = 0
     var save: Byte = 0
@@ -145,6 +196,10 @@ class CipherHelper(final val client: Client) {
     }
   }
 
+  /**
+   * Encrypts data with Maple their custom Shanda
+   * @param buffer Data to encrypt
+   */
   private[Crypto] def encryptShanda(buffer: Array[Byte]): Unit = {
     var xorKey: Byte = 0
     var save: Byte = 0
@@ -174,16 +229,33 @@ class CipherHelper(final val client: Client) {
     }
   }
 
+  /**
+   * Bitwise rotation over left
+   * @param byte Byte to rotate
+   * @param n Times to rotate
+   * @return Rotation result
+   */
   def ROL(byte: Byte, n: Int): Byte = {
     val tmp = (byte & 0xFF) << (n & 7)
     (tmp | tmp >>> 8).toByte
   }
 
+  /**
+   * Bitwise rotation over right
+   * @param byte Byte to rotate
+   * @param n Times to rotate
+   * @return Rotation result
+   */
   def ROR(byte: Byte, n: Int): Byte = {
     val tmp = (byte & 0xFF) << (8 - (n & 7))
     (tmp | tmp >>> 8).toByte
   }
 
+  /**
+   * Shuffles a vector conform the original shuffle of Maple
+   * @param vector Vector to shuffle
+   * @return Shuffle result
+   */
   private[Crypto] def shuffle(vector: Int): Int = {
     var holder: Int = DefaultKey
     val pIv = getHolder(vector)
@@ -203,6 +275,9 @@ class CipherHelper(final val client: Client) {
     setHolder(pKey)
   }
 
+  /**
+   * Transforms an Int to a Byte Array
+   */
   private def getHolder(int: Int): Array[Byte] = {
     val h0: Byte = (int & 0xFF).toByte
     val h1: Byte = ((int >>> 8) & 0xFF).toByte
@@ -211,8 +286,15 @@ class CipherHelper(final val client: Client) {
     Array(h0, h1, h2, h3)
   }
 
+  /**
+   * Transforms an Int to a Byte Array
+   */
   private def setHolder(array: Array[Byte]): Int = ((array(3) & 0xFF) << 24) | ((array(2) & 0xFF) << 16) | ((array(1) & 0xFF) << 8) | (array(0) & 0xFF)
 
+  /**
+   * Get a byte out of the Table
+   * (Used for shuffling the vector)
+   */
   private def getTable(byte: Byte): Byte = {
     if (byte < 0)
       Table(0x100 + byte)
