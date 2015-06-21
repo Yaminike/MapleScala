@@ -26,6 +26,10 @@ object Main extends App {
 
   override def main(args: Array[String]): Unit = {
     initDB()
+    println("Finished initializing database")
+
+    loadWzData()
+    println("Finished loading WZ data")
 
     val system = ActorSystem("MapleScala")
     val auth = system.actorOf(AuthHandler.create, "server-auth")
@@ -44,6 +48,10 @@ object Main extends App {
     )
 
     ConnectionPool.singleton(conf.getString("db.url"), conf.getString("db.user"), conf.getString("db.password"), settings)
+  }
+
+  def loadWzData(): Unit = {
+    Data.WZ.Etc.load()
   }
 }
 

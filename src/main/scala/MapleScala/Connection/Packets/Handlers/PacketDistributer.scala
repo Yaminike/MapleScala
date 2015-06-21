@@ -38,7 +38,8 @@ object PacketDistributer {
     ServerstatusRequest -> ServerstatusRequestHandler,
     AfterLogin -> AfterLoginHandler,
     RegisterPin -> RegisterPinHandler,
-    ServerlistRequest -> ServerlistRequestHandler
+    ServerlistRequest -> ServerlistRequestHandler,
+    CheckCharName -> CheckCharNameHandler
   )
 
   def distribute(packet: PacketReader, client: Client): Unit = {

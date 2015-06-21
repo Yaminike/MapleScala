@@ -24,6 +24,7 @@ object RecvOpcode {
   final val RegisterPin: Short = 0x000A
   final val ServerlistRequest: Short = 0x000B
 
+  final val CheckCharName: Short = 0x0015
   final val Pong: Short = 0x0018
   final val ClientStartError: Short = 0x0019
 
@@ -37,6 +38,7 @@ object SendOpcode {
   final val UpdatePin: Short = 0x0007
   final val Serverlist: Short = 0x000A
   final val Charlist: Short = 0x000B
+  final val CharNameResponse: Short = 0x000D
 
   final val Ping: Short = 0x0011
   final val DefaultWorld: Short = 0x001A

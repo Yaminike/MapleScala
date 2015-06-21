@@ -4,6 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.11.6"
 
+libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.2"
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.11"
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 libraryDependencies += "org.scalikejdbc" %% "scalikejdbc" % "2.2.6"

@@ -1,5 +1,6 @@
 package MapleScala.Data
 
+import MapleScala.Client.MapleCharacter
 import io.github.nremond.SecureHash
 import scalikejdbc._
 
@@ -19,15 +20,14 @@ import scalikejdbc._
  * limitations under the License.
  */
 class User
-  extends Sessionable
-{
+  extends Sessionable {
   var id: Int = 0
   var name: String = ""
   var password: String = ""
   var isGM: Boolean = false
   var pin: Option[Int] = null
 
-  lazy val characters: List[Character] = Character.listForUser(this)
+  lazy val characters: List[MapleCharacter] = Character.listForUser(this)
 
   def validatePassword(password: String): Boolean = SecureHash.validatePassword(password, this.password)
 
@@ -40,8 +40,7 @@ class User
 
 object User
   extends SQLSyntaxSupport[User]
-  with Sessionable
-{
+  with Sessionable {
   def apply(rs: WrappedResultSet): User =
     new User() {
       id = rs.int("id")

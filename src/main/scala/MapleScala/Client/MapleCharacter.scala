@@ -21,7 +21,7 @@ import MapleScala.Data.Character
 class MapleCharacter
   extends Character {
 
-  def addCharEntry(pw: PacketWriter, viewall: Boolean): Unit ={
+  def addCharEntry(pw: PacketWriter, viewall: Boolean): Unit = {
     addCharStats(pw)
     addCharLook(pw, false)
     if (!viewall)

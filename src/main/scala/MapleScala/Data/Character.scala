@@ -1,5 +1,6 @@
 package MapleScala.Data
 
+import MapleScala.Client.MapleCharacter
 import scalikejdbc._
 
 /**
@@ -47,10 +48,9 @@ class Character {
 
 object Character
   extends SQLSyntaxSupport[Character]
-  with Sessionable
-{
-  def apply(rs: WrappedResultSet): Character =
-    new Character() {
+  with Sessionable {
+  def apply(rs: WrappedResultSet): MapleCharacter =
+    new MapleCharacter() {
       id = rs.int("id")
       userId = rs.int("userId")
       name = rs.string("name")
@@ -78,6 +78,9 @@ object Character
       spawnpoint = rs.byte("spawnpoint")
     }
 
-  def listForUser(user: User): List[Character] = sql"SELECT * FROM characters WHERE userId = ${user.id}"
+  def listForUser(user: User): List[MapleCharacter] = sql"SELECT * FROM characters WHERE userId = ${user.id}"
     .map(rs => Character(rs)).list().apply()
+
+  def nameAvailable(name: String): Boolean = sql"SELECT COUNT(id) AS num FROM characters WHERE name = $name"
+    .map(rs => rs.int("num")).first().apply().get == 0
 }

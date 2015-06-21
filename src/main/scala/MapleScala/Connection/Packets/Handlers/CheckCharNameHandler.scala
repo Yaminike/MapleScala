@@ -1,7 +1,9 @@
 package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Data
+import MapleScala.Data.WZ
 
 /**
  * Copyright 2015 Yaminike
@@ -18,28 +20,21 @@ import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object CharlistRequestHandler extends PacketHandler {
+object CheckCharNameHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
-    packet.skip(1)
-    val world = packet.readByte
-    val channel = packet.readByte
-
-    showCharlist(client, world)
+    client.self ! charNameResponse(packet.readMapleString)
   }
 
-  def showCharlist(client: Client, world: Byte): Unit = {
-    val characters = client.user.characters.filter(_.world == world)
+  def isValidName(name: String): Boolean =
+    name.length >= 4 &&
+      name.length <= 13 &&
+      !WZ.Etc.forbiddenNames.exists(f => name.toLowerCase.contains(f)) &&
+      Data.Character.nameAvailable(name)
 
-    val pw = new PacketWriter()
-      .write(SendOpcode.Charlist)
-      .write(0.toByte)
-      .write(characters.length.toByte) // Amount of characters
-
-    characters.foreach(_.addCharEntry(pw, true))
-
-    pw.write(2.toByte) // TODO: PIC
-    pw.write(9) // TODO: Character slots
-
-    client.self ! pw
+  def charNameResponse(name: String): PacketWriter = {
+    new PacketWriter()
+      .write(SendOpcode.CharNameResponse)
+      .write(new MapleString(name))
+      .write(!isValidName(name))
   }
 }
