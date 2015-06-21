@@ -1,7 +1,8 @@
 package MapleScala.Connection.Packets.Handlers
 
+import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.PacketReader
+import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
 
 /**
  * Copyright 2015 Yaminike
@@ -23,5 +24,25 @@ object CharlistRequestHandler extends PacketHandler {
     packet.skip(1)
     val world = packet.readByte
     val channel = packet.readByte
+
+    showCharlist(client, world)
+  }
+
+  def showCharlist(client: Client, world: Byte): Unit = {
+    val characters = client.user.characters.filter(_.world == world)
+
+    val pw = new PacketWriter()
+      .write(SendOpcode.Charlist)
+      .write(0.toByte)
+      .write(characters.length.toByte) // Amount of characters
+
+    characters
+      .map(_.asInstanceOf[MapleCharacter])
+      .foreach(_.addCharEntry(pw, true))
+
+    pw.write(2.toByte) // TODO: PIC
+    pw.write(9) // TODO: Character slots
+
+    client.self ! pw
   }
 }

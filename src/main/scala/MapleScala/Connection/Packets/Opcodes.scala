@@ -36,6 +36,7 @@ object SendOpcode {
   final val CheckPin: Short = 0x0006
   final val UpdatePin: Short = 0x0007
   final val Serverlist: Short = 0x000A
+  final val Charlist: Short = 0x000B
 
   final val Ping: Short = 0x0011
   final val DefaultWorld: Short = 0x001A
