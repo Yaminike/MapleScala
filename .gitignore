@@ -6,4 +6,4 @@
 /target/
 /.sbtserver/
 /.idea/
-src/main/resources/XML/*.xml.gz
+src/main/resources/XML/*.*.gz

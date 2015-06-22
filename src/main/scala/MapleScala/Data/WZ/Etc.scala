@@ -1,8 +1,13 @@
 package MapleScala.Data.WZ
 
+import java.io.InputStream
+import java.nio.ByteBuffer
 import java.util.zip.GZIPInputStream
 
-import scala.xml._
+import PKGNX.LazyNXFile
+import PKGNX.Nodes.{NXLongNode, NXStringNode}
+
+import scala.collection.mutable._
 
 /**
  * Copyright 2015 Yaminike
@@ -20,30 +25,26 @@ import scala.xml._
  * limitations under the License.
  */
 object Etc {
-  var allowedEquips: Seq[Int] = null
-  var forbiddenNames: Seq[String] = null
+  var allowedEquips: MutableList[Long] = new MutableList[Long]()
+  var forbiddenNames: MutableList[String] = new MutableList[String]()
 
   def load(): Unit = {
-    val file = getClass.getResourceAsStream("/XML/etc.xml.gz")
-    val stream = new GZIPInputStream(file)
-    val xml = XML.load(stream)
+    val bytes = GzipParser.readGzip(getClass.getResourceAsStream("/XML/Etc.nx.gz"))
+    val reader = new LazyNXFile(bytes)
 
-    allowedEquips = xml
-      .\\("wzimg")
-      .filter(_ \ "@name" exists (_.text == "MakeCharInfo.img"))
-      .\("imgdir")
-      .filter(_ \ "@name" exists (_.text == "Info"))
-      .\("imgdir")
-      .\("imgdir")
-      .filter(_ \ "@name" exists (_.text.toInt > 4))
-      .\("int")
-      .map(x => (x \@ "value").toInt)
-      .distinct
+    for (node <- reader.resolve("MakeCharInfo.img/Info")) {
+      for (subNode <- node) {
+        // CharFemale | CharMale
+        for (valueNode <- subNode) {
+          val value = valueNode.asInstanceOf[NXLongNode].get()
+          if (value > 1e6)
+            allowedEquips += value
+        }
+      }
+    }
 
-    forbiddenNames = xml
-      .\\("wzimg")
-      .filter(_ \ "@name" exists (_.text == "ForbiddenName.img"))
-      .\("string")
-      .map(x => (x \@ "value").toLowerCase)
+    for (node <- reader.resolve("ForbiddenName.img")) {
+      forbiddenNames += node.asInstanceOf[NXStringNode].get()
+    }
   }
 }
