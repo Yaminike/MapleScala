@@ -4,6 +4,8 @@ import java.io.InputStream
 import java.nio.ByteBuffer
 import java.util.zip.GZIPInputStream
 
+import MapleScala.Helper._
+
 /**
  * Copyright 2015 Yaminike
  *
@@ -22,31 +24,36 @@ import java.util.zip.GZIPInputStream
 object GzipParser {
   def readGzip(stream: InputStream): ByteBuffer = {
     val size = getGzipSize(stream)
-    val gzip = new GZIPInputStream(stream)
     val result = ByteBuffer.allocate(size)
 
-    var bufferSize = 0x200
-    if (bufferSize > size)
-      bufferSize = size
+    using(new GZIPInputStream(stream))(gzip => {
+      val bufferSize: Int = 0x200
 
-    val temp = new Array[Byte](bufferSize)
-    var n = gzip.read(temp)
-    while (n >= 0) {
-      result.put(temp, 0, n)
-      n = gzip.read(temp)
-    }
+      val temp = new Array[Byte](bufferSize)
+      var n = gzip.read(temp)
+      while (n >= 0) {
+        result.put(temp, 0, n)
+        n = gzip.read(temp)
+      }
+    })
 
     result
   }
 
   def getGzipSize(stream: InputStream): Int = {
     stream.mark(stream.available())
-    stream.skip(stream.available() - 4)
+
+    // It appears that stream.skip causes unwanted behavior
+    for (i <- 4 until stream.available())
+      stream.read()
+
     val b4 = stream.read()
     val b3 = stream.read()
     val b2 = stream.read()
     val b1 = stream.read()
+
     stream.reset()
+
     (b1 << 24) | (b2 << 16) | (b3 << 8) | b4
   }
 }

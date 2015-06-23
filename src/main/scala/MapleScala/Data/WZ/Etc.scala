@@ -1,9 +1,8 @@
 package MapleScala.Data.WZ
 
-import java.io.InputStream
 import java.nio.ByteBuffer
-import java.util.zip.GZIPInputStream
 
+import MapleScala.Helper._
 import PKGNX.LazyNXFile
 import PKGNX.Nodes.{NXLongNode, NXStringNode}
 
@@ -29,9 +28,13 @@ object Etc {
   var forbiddenNames: MutableList[String] = new MutableList[String]()
 
   def load(): Unit = {
-    val bytes = GzipParser.readGzip(getClass.getResourceAsStream("/XML/Etc.nx.gz"))
-    val reader = new LazyNXFile(bytes)
+    var bytes: ByteBuffer = null
 
+    using(getClass.getResourceAsStream("/XML/Etc.nx.gz"))(stream => {
+      bytes = GzipParser.readGzip(stream)
+    })
+
+    val reader = new LazyNXFile(bytes)
     for (node <- reader.resolve("MakeCharInfo.img/Info")) {
       for (subNode <- node) {
         // CharFemale | CharMale
