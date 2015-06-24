@@ -28,7 +28,7 @@ object RegisterPinHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val authRequest = client.server ? new AuthRequest.GetStatus(client.user.id)
+    val authRequest = client.auth ? new AuthRequest.GetStatus(client.user.id)
     authRequest.onComplete({
       case Success(result) =>
         if (packet.readByte != 0) {

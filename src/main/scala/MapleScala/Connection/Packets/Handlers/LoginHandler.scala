@@ -32,7 +32,7 @@ object LoginHandler extends PacketHandler {
     val username: String = packet.readMapleString
     val password: String = packet.readMapleString
 
-    val authRequest = client.server ? new AuthRequest.Login(username, password)
+    val authRequest = client.auth ? new AuthRequest.Login(username, password)
     authRequest.onComplete({
       case Success(result) =>
         val response = result.asInstanceOf[AuthResponse.Login]

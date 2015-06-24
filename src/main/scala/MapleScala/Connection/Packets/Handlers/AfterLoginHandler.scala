@@ -43,7 +43,7 @@ object AfterLoginHandler extends PacketHandler {
         if (state == 0) {
           val pin = packet.readMapleString
           if (pin.forall(_.isDigit) && client.user.validatePIN(pin.toInt)) {
-            val authRequest = client.server ? new AuthRequest.SetStatus(client.user.id, AuthStatus.PinAccepted)
+            val authRequest = client.auth ? new AuthRequest.SetStatus(client.user.id, AuthStatus.PinAccepted)
             authRequest.onComplete({
               case Success(result) => pinOperation(client, Reasons.Accept)
               case Failure(failure) => pinOperation(client, Reasons.RequestAfterFailure)

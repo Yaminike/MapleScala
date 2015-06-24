@@ -2,8 +2,12 @@ package MapleScala.Connection
 
 import java.net.InetSocketAddress
 
+import akka.actor.SupervisorStrategy._
 import akka.actor._
 import akka.io._
+import akka.routing.RoundRobinPool
+
+import scala.concurrent.duration._
 
 /**
  * Copyright 2015 Yaminike
@@ -29,6 +33,17 @@ class Server(port: Int, auth: ActorRef) extends Actor {
   import Tcp._
   import context.system
 
+  // TODO: Custom error logging
+  override val supervisorStrategy =
+    OneForOneStrategy(loggingEnabled = true, maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+      case _ => Restart // Try to keep it alive
+    }
+
+  val clientStrategy =
+    OneForOneStrategy(loggingEnabled = true) {
+      case _ => Stop // Always blame the client
+    }
+
   IO(Tcp) ! Bind(self, new InetSocketAddress(MapleScala.Main.conf.getString("server.ip"), port))
 
   override def receive = {
@@ -38,8 +53,11 @@ class Server(port: Int, auth: ActorRef) extends Actor {
       println("Server failed to start")
       context.stop(self)
     case Connected(remote, local) =>
-      val handler = context.actorOf(Client.create(sender(), self))
-      sender() ! Register(handler)
-    case x => auth.forward(x) // TODO: Find an alternative to this
+      val client = context.actorOf(
+        RoundRobinPool(1, supervisorStrategy = clientStrategy)
+          .props(Client.create(sender(), auth))
+      )
+      sender() ! Register(client)
+      client ! new Client.Handshake
   }
 }

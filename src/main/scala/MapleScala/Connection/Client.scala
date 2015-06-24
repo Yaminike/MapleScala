@@ -24,24 +24,24 @@ import akka.io._
  * limitations under the License.
  */
 object Client {
-  def create(connection: ActorRef, server: ActorRef): Props = Props(new Client(connection, server))
+  def create(connection: ActorRef, auth: ActorRef): Props = Props(new Client(connection, auth))
+
+  class Handshake
+
 }
 
-class Client(val connection: ActorRef, val server: ActorRef) extends Actor {
-
-  class Send(val data: PacketWriter)
+class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
 
   import Tcp._
 
   private final val cipher = new CipherHelper(this)
   var user: User = null
 
-  handshake()
-
   def receive = {
     case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
     case Received(data) => PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
     case _: ConnectionClosed => disconnect()
+    case _: Client.Handshake => handshake()
   }
 
   def setActive() = {
@@ -53,7 +53,7 @@ class Client(val connection: ActorRef, val server: ActorRef) extends Actor {
 
   def logout() = {
     if (user != null) {
-      server ! new AuthRequest.Logout(user.id)
+      auth ! new AuthRequest.Logout(user.id)
       user = null
     }
   }
