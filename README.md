@@ -31,6 +31,12 @@ All user configuration can be found in the [application config file](/src/main/r
 
 Please note, the default database driver is MySQL, if you wish to change it, please also update [build.sbt](/build.sbt) to include the driver you want to use.
 
+### WZ Data
+All data from the WZ files is converterted to the [NX (PKG4) Format Specification](http://nxformat.github.io/) and compressed using GZip rather than LZ4, due native support existing for it.
+The files should be placed in the resources/XML folder.
+
+A download is available from [here][9] (obviously you should unzip all files into the folder)
+
 ### License
 
 > Copyright 2015 Yaminike
@@ -55,3 +61,4 @@ Please note, the default database driver is MySQL, if you wish to change it, ple
 [6]: http://akka.io/
 [7]: https://github.com/nremond/pbkdf2-scala
 [8]: https://github.com/Yaminike/
+[9]: https://mega.co.nz/#!VM4iDAZY!pyxlWJJHnygtmB4-Pl4UjNtkcKs5P-LtSm6u8y9ZTGw
