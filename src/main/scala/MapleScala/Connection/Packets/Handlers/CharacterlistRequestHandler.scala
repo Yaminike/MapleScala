@@ -18,24 +18,27 @@ import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object CharlistRequestHandler extends PacketHandler {
+object CharacterlistRequestHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
     packet.skip(1)
-    val world = packet.readByte
-    val channel = packet.readByte
+    val world = packet.getByte
+    val channel = packet.getByte
 
-    showCharlist(client, world)
+    client.loginstate.world = world
+    client.loginstate.channel = channel
+
+    showCharacterlist(client, world)
   }
 
-  def showCharlist(client: Client, world: Byte): Unit = {
-    val characters = client.user.characters.filter(_.world == world)
+  def showCharacterlist(client: Client, world: Byte): Unit = {
+    val characters = client.loginstate.user.getCharacters.filter(_.world == world)
 
     val pw = new PacketWriter()
-      .write(SendOpcode.Charlist)
+      .write(SendOpcode.Characterlist)
       .write(0.toByte)
       .write(characters.length.toByte) // Amount of characters
 
-    characters.foreach(_.addCharEntry(pw, true))
+    characters.foreach(_.addCharEntry(pw, viewall = true))
 
     pw.write(2.toByte) // TODO: PIC
     pw.write(9) // TODO: Character slots

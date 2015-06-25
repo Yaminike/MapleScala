@@ -18,13 +18,15 @@ package MapleScala.Connection.Packets
 object RecvOpcode {
   final val LoginPassword: Short = 0x0001
   final val ServerlistReRequest: Short = 0x0004
-  final val CharlistRequest: Short = 0x0005
+  final val CharacterlistRequest: Short = 0x0005
   final val ServerstatusRequest: Short = 0x0006
   final val AfterLogin: Short = 0x0009
   final val RegisterPin: Short = 0x000A
   final val ServerlistRequest: Short = 0x000B
+  final val PlayerDisconnect: Short = 0x000C
 
-  final val CheckCharName: Short = 0x0015
+  final val CheckCharacterName: Short = 0x0015
+  final val CreateCharacter: Short = 0x0016
   final val Pong: Short = 0x0018
   final val ClientStartError: Short = 0x0019
 
@@ -37,8 +39,9 @@ object SendOpcode {
   final val CheckPin: Short = 0x0006
   final val UpdatePin: Short = 0x0007
   final val Serverlist: Short = 0x000A
-  final val Charlist: Short = 0x000B
-  final val CharNameResponse: Short = 0x000D
+  final val Characterlist: Short = 0x000B
+  final val CharacterNameResponse: Short = 0x000D
+  final val AddNewCharacter: Short = 0x000E
 
   final val Ping: Short = 0x0011
   final val DefaultWorld: Short = 0x001A

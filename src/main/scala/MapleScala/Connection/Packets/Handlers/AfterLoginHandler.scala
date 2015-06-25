@@ -28,10 +28,11 @@ object AfterLoginHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val step = packet.readByte
+    val step = packet.getByte
+    val user = client.loginstate.user
     var state: Byte = -1
     if (packet.available > 0)
-      state = packet.readByte
+      state = packet.getByte
 
     step match {
       case 0 =>
@@ -41,9 +42,9 @@ object AfterLoginHandler extends PacketHandler {
         }
       case 1 =>
         if (state == 0) {
-          val pin = packet.readMapleString
-          if (pin.forall(_.isDigit) && client.user.validatePIN(pin.toInt)) {
-            val authRequest = client.auth ? new AuthRequest.SetStatus(client.user.id, AuthStatus.PinAccepted)
+          val pin = packet.getMapleString
+          if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt)) {
+            val authRequest = client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PinAccepted)
             authRequest.onComplete({
               case Success(result) => pinOperation(client, Reasons.Accept)
               case Failure(failure) => pinOperation(client, Reasons.RequestAfterFailure)
@@ -52,15 +53,15 @@ object AfterLoginHandler extends PacketHandler {
             pinOperation(client, Reasons.RequestAfterFailure)
           }
         } else if (state == 1) {
-          if (client.user.pin.nonEmpty)
+          if (user.pin.nonEmpty)
             pinOperation(client, Reasons.Request)
           else
             pinOperation(client, Reasons.Register)
         }
       case 2 =>
         if (state == 0) {
-          val pin = packet.readMapleString
-          if (pin.forall(_.isDigit) && client.user.validatePIN(pin.toInt))
+          val pin = packet.getMapleString
+          if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt))
             pinOperation(client, Reasons.Register)
           else
             pinOperation(client, Reasons.RequestAfterFailure)

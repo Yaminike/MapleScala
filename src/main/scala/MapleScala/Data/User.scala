@@ -27,13 +27,13 @@ class User
   var isGM: Boolean = false
   var pin: Option[Int] = null
 
-  lazy val characters: List[MapleCharacter] = Character.listForUser(this)
+  def getCharacters: List[MapleCharacter] = Character.listForUser(this)
 
   def validatePassword(password: String): Boolean = SecureHash.validatePassword(password, this.password)
 
   def validatePIN(pin: Int): Boolean = pin == this.pin.getOrElse(-1) // I figured hashing it would be utterly useless
 
-  def updateUser(): Unit = sql"UPDATE users SET name = $name, password = $password, isGM = $isGM, pin = $pin WHERE id = $id"
+  def save(): Unit = sql"UPDATE users SET name = $name, password = $password, isGM = $isGM, pin = $pin WHERE id = $id"
     .update()
     .apply()
 }

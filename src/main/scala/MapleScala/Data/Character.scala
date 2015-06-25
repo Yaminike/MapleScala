@@ -1,6 +1,6 @@
 package MapleScala.Data
 
-import MapleScala.Client.MapleCharacter
+import MapleScala.Client.{MapleJob, MapleCharacter}
 import scalikejdbc._
 
 /**
@@ -27,16 +27,16 @@ class Character {
   var skinColor: Byte = 0
   var face: Int = 0
   var hair: Int = 0
-  var level: Byte = 0
-  var job: Short = 0
-  var str: Short = 0
-  var dex: Short = 0
-  var int: Short = 0
-  var luk: Short = 0
-  var hp: Short = 0
-  var maxHp: Short = 0
-  var mp: Short = 0
-  var maxMp: Short = 0
+  var level: Byte = 1
+  var job: Short = MapleJob.Beginner
+  var str: Short = 12
+  var dex: Short = 5
+  var int: Short = 4
+  var luk: Short = 4
+  var hp: Short = 50
+  var maxHp: Short = 50
+  var mp: Short = 5
+  var maxMp: Short = 5
   var ap: Short = 0
   var sp: Short = 0
   var exp: Int = 0
@@ -44,6 +44,13 @@ class Character {
   var gachaExp: Int = 0
   var map: Int = 0
   var spawnpoint: Byte = 0
+
+  def save(): Unit = {
+    if (id == 0)
+      Character.insert(this)
+    else
+      Character.update(this)
+  }
 }
 
 object Character
@@ -83,4 +90,35 @@ object Character
 
   def nameAvailable(name: String): Boolean = sql"SELECT COUNT(id) AS num FROM characters WHERE name = $name"
     .map(rs => rs.int("num")).first().apply().get == 0
+
+  def insert(char: Character) = {
+    char.id = sql"""
+      INSERT INTO characters
+       (userId, name, world, gender, skinColor,
+        face, hair, level, job, str,
+        dex, `int`, luk, hp, maxHp,
+        mp, maxMp, ap, sp, exp,
+        fame, gachaExp, map, spawnpoint)
+      VALUES
+        (${char.userId}, ${char.name}, ${char.world}, ${char.gender}, ${char.skinColor},
+        ${char.face}, ${char.hair}, ${char.level}, ${char.job}, ${char.str},
+        ${char.dex}, ${char.int}, ${char.luk}, ${char.hp}, ${char.maxHp},
+        ${char.mp}, ${char.maxMp}, ${char.ap}, ${char.sp}, ${char.exp},
+        ${char.fame}, ${char.gachaExp}, ${char.map}, ${char.spawnpoint})"""
+      .updateAndReturnGeneratedKey()
+      .apply()
+      .toInt
+  }
+
+  def update(char: Character) =
+    sql"""
+      UPDATE characters SET
+        userId = ${char.userId}, name = ${char.name}, world = ${char.world}, gender = ${char.gender}, skinColor = ${char.skinColor},
+        face = ${char.face}, hair = ${char.hair}, level = ${char.level}, job = ${char.job}, str = ${char.str},
+        dex = ${char.dex}, `int` = ${char.int}, luk = ${char.luk}, hp = ${char.hp}, maxHp = ${char.maxHp},
+        mp = ${char.mp}, maxMp = ${char.maxMp}, ap = ${char.ap}, sp = ${char.sp}, exp = ${char.exp},
+        fame = ${char.fame},gachaExp = ${char.gachaExp}, map = ${char.map}, spawnpoint = ${char.spawnpoint}
+      WHERE id = ${char.id}"""
+    .update()
+    .apply()
 }

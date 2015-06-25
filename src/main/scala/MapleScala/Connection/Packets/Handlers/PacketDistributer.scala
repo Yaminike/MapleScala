@@ -34,19 +34,21 @@ object PacketDistributer {
   // These packets only occur when the user is logged in
   final lazy val handlers: immutable.HashMap[Short, PacketHandler] = immutable.HashMap(
     ServerlistReRequest -> ServerlistRequestHandler,
-    CharlistRequest -> CharlistRequestHandler,
+    CharacterlistRequest -> CharacterlistRequestHandler,
     ServerstatusRequest -> ServerstatusRequestHandler,
     AfterLogin -> AfterLoginHandler,
     RegisterPin -> RegisterPinHandler,
     ServerlistRequest -> ServerlistRequestHandler,
-    CheckCharName -> CheckCharNameHandler
+    PlayerDisconnect -> EmptyHandler,
+    CheckCharacterName -> CheckCharacterNameHandler,
+    CreateCharacter -> CreateCharacterHandler
   )
 
   def distribute(packet: PacketReader, client: Client): Unit = {
-    val header: Short = packet.readShort
+    val header: Short = packet.getShort
 
     if (handlers.contains(header)) {
-      if (client.user == null)
+      if (client.loginstate.user == null)
         client.connection ! Abort
       else
         handlers.get(header).get.handle(packet, client)

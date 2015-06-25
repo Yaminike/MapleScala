@@ -1,7 +1,6 @@
-package MapleScala.Connection.Packets.Handlers
+package MapleScala.Connection
 
-import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Data.User
 
 /**
  * Copyright 2015 Yaminike
@@ -18,17 +17,8 @@ import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object ServerstatusRequestHandler extends PacketHandler {
-  def handle(packet: PacketReader, client: Client): Unit = {
-    val world = packet.getShort // TODO: get the actual status
-    sendServerStatus(client, 0)
-  }
-
-  private def sendServerStatus(client: Client, status: Short): Unit = {
-    val pw = new PacketWriter()
-      .write(SendOpcode.Serverstatus)
-      .write(status)
-
-    client.self ! pw
-  }
+class Loginstatus {
+  var user: User = null
+  var world: Byte = 0
+  var channel: Byte = 0
 }

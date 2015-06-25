@@ -24,7 +24,7 @@ import scala.collection.mutable._
  * limitations under the License.
  */
 object Etc {
-  var allowedEquips: MutableList[Long] = new MutableList[Long]()
+  var allowedEquips: HashSet[Long] = new HashSet[Long]()
   var forbiddenNames: MutableList[String] = new MutableList[String]()
 
   def load(): Unit = {

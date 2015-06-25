@@ -1,7 +1,8 @@
 package MapleScala.Client
 
 import MapleScala.Connection.Packets.PacketWriter
-import MapleScala.Data.Character
+import MapleScala.Data
+import MapleScala.Data.{WZ, Character}
 
 /**
  * Copyright 2015 Yaminike
@@ -18,6 +19,16 @@ import MapleScala.Data.Character
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+object MapleCharacter {
+  def isValidName(name: String): Boolean =
+    name.length >= 4 &&
+      name.length <= 13 &&
+      !WZ.Etc.forbiddenNames.exists(f => name.toLowerCase.contains(f)) &&
+      Data.Character.nameAvailable(name)
+
+  def getDefault: MapleCharacter = new MapleCharacter
+}
+
 class MapleCharacter
   extends Character {
 
@@ -79,5 +90,10 @@ class MapleCharacter
       .write(sep)
       .write(sep)
       .empty(16) // TODO: pet equips, cash weapon
+  }
+
+  override def save(): Unit ={
+    super.save()
+    // TODO: Equips etc
   }
 }

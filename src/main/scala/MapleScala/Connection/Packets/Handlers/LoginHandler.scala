@@ -29,15 +29,15 @@ object LoginHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val username: String = packet.readMapleString
-    val password: String = packet.readMapleString
+    val username: String = packet.getMapleString
+    val password: String = packet.getMapleString
 
     val authRequest = client.auth ? new AuthRequest.Login(username, password)
     authRequest.onComplete({
       case Success(result) =>
         val response = result.asInstanceOf[AuthResponse.Login]
         if (response.result == 0) {
-          client.user = response.user
+          client.loginstate.user = response.user
           validLogin(response.user, client)
         } else {
           failedLogin(client, response.result)

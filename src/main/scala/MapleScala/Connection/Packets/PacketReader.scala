@@ -18,25 +18,25 @@ import java.nio.ByteBuffer
  * limitations under the License.
  */
 class PacketReader(final val buffer: ByteBuffer) {
-  def readBool = buffer.get == 1
+  def getBool = buffer.get == 1
 
-  def readByte = buffer.get
+  def getByte = buffer.get
 
-  def readShort = buffer.getShort
+  def getShort = buffer.getShort
 
-  def readInt = buffer.getInt
+  def getInt = buffer.getInt
 
-  def readLong = buffer.getLong
+  def getLong = buffer.getLong
 
-  def readBytes(amount: Int) = {
+  def getBytes(amount: Int) = {
     val result: Array[Byte] = new Array(amount)
     buffer.get(result)
     result
   }
 
-  def readString(amount: Int) = new String(readBytes(amount))
+  def getString(amount: Int) = new String(getBytes(amount))
 
-  def readMapleString = new String(readBytes(readShort))
+  def getMapleString = new String(getBytes(getShort))
 
   def skip(amount: Int) = buffer.position(amount + buffer.position())
 

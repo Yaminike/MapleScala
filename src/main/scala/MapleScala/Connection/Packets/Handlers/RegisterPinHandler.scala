@@ -28,17 +28,18 @@ object RegisterPinHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val authRequest = client.auth ? new AuthRequest.GetStatus(client.user.id)
+    val user = client.loginstate.user
+    val authRequest = client.auth ? new AuthRequest.GetStatus(user.id)
     authRequest.onComplete({
       case Success(result) =>
-        if (packet.readByte != 0) {
+        if (packet.getByte != 0) {
           val response = result.asInstanceOf[AuthResponse.GetStatus]
           if (response.status.contains(AuthStatus.LoggedIn) &&
-            (response.status.contains(AuthStatus.PinAccepted) || client.user.pin.isEmpty)) {
-            val pin = packet.readMapleString
+            (response.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
+            val pin = packet.getMapleString
             if (pin.forall(_.isDigit)) {
-              client.user.pin = Option(pin.toInt)
-              client.user.updateUser()
+              user.pin = Option(pin.toInt)
+              user.save()
             }
           }
         }

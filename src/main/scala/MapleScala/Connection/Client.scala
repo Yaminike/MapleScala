@@ -35,7 +35,7 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
   import Tcp._
 
   private final val cipher = new CipherHelper(this)
-  var user: User = null
+  val loginstate = new Loginstatus
 
   def receive = {
     case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
@@ -52,9 +52,9 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
   }
 
   def logout() = {
-    if (user != null) {
-      auth ! new AuthRequest.Logout(user.id)
-      user = null
+    if (loginstate.user != null) {
+      auth ! new AuthRequest.Logout(loginstate.user.id)
+      loginstate.user = null
     }
   }
 

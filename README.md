@@ -27,7 +27,7 @@ And when using the Typesafe Activator, it should also be installed
 3. Press Run
 
 ### Configuration
-All user configuration can be found in the [application config file](/src/main/resources/application.conf).
+All user configuration can be found in the [application config file](/src/main/resources/application.json).
 
 Please note, the default database driver is MySQL, if you wish to change it, please also update [build.sbt](/build.sbt) to include the driver you want to use.
 

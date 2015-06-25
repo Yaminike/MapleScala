@@ -1,5 +1,6 @@
 package MapleScala.Connection.Packets.Handlers
 
+import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
 import MapleScala.Data
@@ -20,21 +21,15 @@ import MapleScala.Data.WZ
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object CheckCharNameHandler extends PacketHandler {
+object CheckCharacterNameHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
-    client.self ! charNameResponse(packet.readMapleString)
+    client.self ! charNameResponse(packet.getMapleString)
   }
-
-  def isValidName(name: String): Boolean =
-    name.length >= 4 &&
-      name.length <= 13 &&
-      !WZ.Etc.forbiddenNames.exists(f => name.toLowerCase.contains(f)) &&
-      Data.Character.nameAvailable(name)
 
   def charNameResponse(name: String): PacketWriter = {
     new PacketWriter()
-      .write(SendOpcode.CharNameResponse)
+      .write(SendOpcode.CharacterNameResponse)
       .write(new MapleString(name))
-      .write(!isValidName(name))
+      .write(!MapleCharacter.isValidName(name))
   }
 }
