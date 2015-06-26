@@ -25,7 +25,7 @@ class User
   var name: String = ""
   var password: String = ""
   var isGM: Boolean = false
-  var pin: Option[Int] = null
+  var pin: Option[Int] = None
 
   def getCharacters: List[MapleCharacter] = Character.listForUser(this)
 
@@ -50,9 +50,9 @@ object User
       pin = rs.intOpt("pin")
     }
 
-  def getById(id: Int): User = sql"SELECT * FROM users WHERE id = $id"
-    .map(rs => User(rs)).single().apply.orNull
+  def getById(id: Int): Option[User] = sql"SELECT * FROM users WHERE id = $id"
+    .map(rs => User(rs)).single().apply()
 
-  def getByName(name: String): User = sql"SELECT * FROM users WHERE name = $name"
-    .map(rs => User(rs)).single().apply.orNull
+  def getByName(name: String): Option[User] = sql"SELECT * FROM users WHERE name = $name"
+    .map(rs => User(rs)).single().apply()
 }

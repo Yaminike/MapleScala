@@ -31,18 +31,20 @@ object CharacterlistRequestHandler extends PacketHandler {
   }
 
   def showCharacterlist(client: Client, world: Byte): Unit = {
-    val characters = client.loginstate.user.getCharacters.filter(_.world == world)
+    for (user <- client.loginstate.user) {
+      val characters = user.getCharacters.filter(_.world == world)
 
-    val pw = new PacketWriter()
-      .write(SendOpcode.Characterlist)
-      .write(0.toByte)
-      .write(characters.length.toByte) // Amount of characters
+      val pw = new PacketWriter()
+        .write(SendOpcode.Characterlist)
+        .write(0.toByte)
+        .write(characters.length.toByte) // Amount of characters
 
-    characters.foreach(_.addCharEntry(pw, viewall = true))
+      characters.foreach(_.addCharEntry(pw, viewall = true))
 
-    pw.write(2.toByte) // TODO: PIC
-    pw.write(9) // TODO: Character slots
+      pw.write(2.toByte) // TODO: PIC
+      pw.write(9) // TODO: Character slots
 
-    client.self ! pw
+      client.self ! pw
+    }
   }
 }

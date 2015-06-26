@@ -19,10 +19,10 @@ import MapleScala.Data.User
  */
 object AuthResponse {
 
-  class Login(var result: Byte, val user: User)
+  case class Login(result: Byte, user: Option[User])
 
-  class CheckLogin(val loggedin: Boolean)
+  case class CheckLogin(loggedin: Boolean)
 
-  class GetStatus(val status: AuthStatus.ValueSet)
+  case class GetStatus(status: AuthStatus.ValueSet)
 
 }

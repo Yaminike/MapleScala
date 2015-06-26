@@ -29,38 +29,37 @@ class AuthHandler extends Actor {
 
   def receive = {
     case req: AuthRequest.Login =>
-      val user: User = User.getByName(req.username)
-      val response = new AuthResponse.Login(0, user)
-      if (user == null)
-        response.result = 5
-      else if (!user.validatePassword(req.password))
-        response.result = 4
-
-      if (!users.contains(user.id))
-        users.put(user.id, new AuthHolder(AuthStatus.ValueSet()))
-      users(user.id).status += AuthStatus.LoggedIn
-
-      sender() ! response
+      val user: Option[User] = User.getByName(req.username)
+      if (user.isEmpty) {
+        sender ! new AuthResponse.Login(5, user)
+      } else if (!user.get.validatePassword(req.password)) {
+        sender ! new AuthResponse.Login(4, user)
+      } else {
+        users += user.get.id -> new AuthHolder {
+          status += AuthStatus.LoggedIn
+        }
+        sender ! new AuthResponse.Login(0, user)
+      }
 
     case req: AuthRequest.Logout =>
       if (users.contains(req.id))
         users.remove(req.id)
 
     case req: AuthRequest.CheckLogin =>
-      sender() ! new AuthResponse.CheckLogin(users.contains(req.id))
+      sender ! new AuthResponse.CheckLogin(users.contains(req.id))
 
     case req: AuthRequest.GetStatus =>
       if (users.contains(req.id))
-        sender() ! new AuthResponse.GetStatus(users(req.id).status)
+        sender ! new AuthResponse.GetStatus(users(req.id).status)
       else
-        sender() ! new AuthResponse.GetStatus(AuthStatus.ValueSet())
+        sender ! new AuthResponse.GetStatus(AuthStatus.ValueSet())
 
     case req: AuthRequest.SetStatus =>
       if (users.contains(req.id)) {
         users(req.id).status += req.status
-        sender() ! true
+        sender ! true
       } else {
-        sender() ! false
+        sender ! false
       }
   }
 }

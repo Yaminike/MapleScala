@@ -48,10 +48,10 @@ object PacketDistributer {
     val header: Short = packet.getShort
 
     if (handlers.contains(header)) {
-      if (client.loginstate.user == null)
+      if (client.loginstate.user.isEmpty)
         client.connection ! Abort
       else
-        handlers.get(header).get.handle(packet, client)
+        handlers(header).handle(packet, client)
     } else if (defaultHandlers.contains(header)) {
       defaultHandlers.get(header).get.handle(packet, client)
     } else {

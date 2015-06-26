@@ -51,9 +51,10 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
   }
 
   def logout() = {
-    if (loginstate.user != null) {
-      auth ! new AuthRequest.Logout(loginstate.user.id)
-      loginstate.user = null
+    for (user <- loginstate.user) {
+      auth ! new AuthRequest.Logout(user.id)
+      loginstate.user = None
+
     }
   }
 

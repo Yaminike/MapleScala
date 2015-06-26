@@ -41,7 +41,7 @@ object CreateCharacterHandler extends PacketHandler {
     }
 
     val character = MapleCharacter.getDefault
-    character.userId = client.loginstate.user.id
+    character.userId = client.loginstate.user.get.id
     character.world = client.loginstate.world
     character.name = name
     character.face = face

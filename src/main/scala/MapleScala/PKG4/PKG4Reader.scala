@@ -31,8 +31,8 @@ final class PKG4Reader(override val buffer: ByteBuffer)
   private def parseNode(index: Long): PKG4Node = {
     seek(header.nodeOffset + index * PKG4Node.size)
 
-    val length: Long = getUInt
-    val name: String = tables.getString(length)
+    val offset: Long = getUInt
+    val name: String = tables.getString(offset)
     val childIndex: Long = getUInt
     val childCount: Int = getUShort
     val nodeType: Int = getUShort

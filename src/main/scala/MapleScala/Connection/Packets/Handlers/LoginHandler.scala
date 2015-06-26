@@ -38,7 +38,9 @@ object LoginHandler extends PacketHandler {
         val response = result.asInstanceOf[AuthResponse.Login]
         if (response.result == 0) {
           client.loginstate.user = response.user
-          validLogin(response.user, client)
+          for (user <- response.user) {
+            validLogin(user, client)
+          }
         } else {
           failedLogin(client, response.result)
         }

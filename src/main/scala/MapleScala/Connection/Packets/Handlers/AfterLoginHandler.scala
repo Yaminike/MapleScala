@@ -28,44 +28,45 @@ object AfterLoginHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val step = packet.getByte
-    val user = client.loginstate.user
-    var state: Byte = -1
-    if (packet.available > 0)
-      state = packet.getByte
+    for (user <- client.loginstate.user) {
+      val step = packet.getByte
+      var state: Byte = -1
+      if (packet.available > 0)
+        state = packet.getByte
 
-    step match {
-      case 0 =>
-        if (state == -1) {
-          // Cancel
-          client.logout()
-        }
-      case 1 =>
-        if (state == 0) {
-          val pin = packet.getString
-          if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt)) {
-            val authRequest = client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PinAccepted)
-            authRequest.onComplete({
-              case Success(result) => pinOperation(client, Reasons.Accept)
-              case Failure(failure) => pinOperation(client, Reasons.RequestAfterFailure)
-            })(client.context.dispatcher)
-          } else {
-            pinOperation(client, Reasons.RequestAfterFailure)
+      step match {
+        case 0 =>
+          if (state == -1) {
+            // Cancel
+            client.logout()
           }
-        } else if (state == 1) {
-          if (user.pin.nonEmpty)
-            pinOperation(client, Reasons.Request)
-          else
-            pinOperation(client, Reasons.Register)
-        }
-      case 2 =>
-        if (state == 0) {
-          val pin = packet.getString
-          if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt))
-            pinOperation(client, Reasons.Register)
-          else
-            pinOperation(client, Reasons.RequestAfterFailure)
-        }
+        case 1 =>
+          if (state == 0) {
+            val pin = packet.getString
+            if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt)) {
+              val authRequest = client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PinAccepted)
+              authRequest.onComplete({
+                case Success(result) => pinOperation(client, Reasons.Accept)
+                case Failure(failure) => pinOperation(client, Reasons.RequestAfterFailure)
+              })(client.context.dispatcher)
+            } else {
+              pinOperation(client, Reasons.RequestAfterFailure)
+            }
+          } else if (state == 1) {
+            if (user.pin.nonEmpty)
+              pinOperation(client, Reasons.Request)
+            else
+              pinOperation(client, Reasons.Register)
+          }
+        case 2 =>
+          if (state == 0) {
+            val pin = packet.getString
+            if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt))
+              pinOperation(client, Reasons.Register)
+            else
+              pinOperation(client, Reasons.RequestAfterFailure)
+          }
+      }
     }
   }
 

@@ -28,24 +28,25 @@ object RegisterPinHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val user = client.loginstate.user
-    val authRequest = client.auth ? new AuthRequest.GetStatus(user.id)
-    authRequest.onComplete({
-      case Success(result) =>
-        if (packet.getByte != 0) {
-          val response = result.asInstanceOf[AuthResponse.GetStatus]
-          if (response.status.contains(AuthStatus.LoggedIn) &&
-            (response.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
-            val pin = packet.getString
-            if (pin.forall(_.isDigit)) {
-              user.pin = Option(pin.toInt)
-              user.save()
+    for (user <- client.loginstate.user) {
+      val authRequest = client.auth ? new AuthRequest.GetStatus(user.id)
+      authRequest.onComplete({
+        case Success(result) =>
+          if (packet.getByte != 0) {
+            val response = result.asInstanceOf[AuthResponse.GetStatus]
+            if (response.status.contains(AuthStatus.LoggedIn) &&
+              (response.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
+              val pin = packet.getString
+              if (pin.forall(_.isDigit)) {
+                user.pin = Option(pin.toInt)
+                user.save()
+              }
             }
           }
-        }
-        updatePin(client)
-      case Failure(failure) => updatePin(client)
-    })(client.context.dispatcher)
+          updatePin(client)
+        case Failure(failure) => updatePin(client)
+      })(client.context.dispatcher)
+    }
   }
 
   def updatePin(client: Client): Unit = {

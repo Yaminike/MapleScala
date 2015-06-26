@@ -18,7 +18,7 @@ import MapleScala.Data.User
  * limitations under the License.
  */
 class Loginstatus {
-  var user: User = null
+  var user: Option[User] = None
   var world: Byte = 0
   var channel: Byte = 0
 }
