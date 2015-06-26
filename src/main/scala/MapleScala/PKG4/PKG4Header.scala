@@ -1,8 +1,4 @@
-package MapleScala.Connection.Packets
-
-import java.nio.ByteBuffer
-
-import MapleScala.Util.LittleEndianReader
+package MapleScala.PKG4
 
 /**
  * Copyright 2015 Yaminike
@@ -19,6 +15,20 @@ import MapleScala.Util.LittleEndianReader
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class PacketReader(override val buffer: ByteBuffer)
-  extends LittleEndianReader(buffer) {
+final class PKG4Header(reader: PKG4Reader) {
+  reader.seek(0)
+
+  // Header validation
+  val header = reader.getString(4)
+  if (!header.equals("PKG4"))
+    throw new RuntimeException(s"Invalid header, found '$header'  expected 'PKG4'")
+
+  val nodeCount = reader.getUInt
+  val nodeOffset = reader.getLong
+  val stringCount = reader.getUInt
+  val stringOffset = reader.getLong
+  val bitmapCount = reader.getUInt
+  val bitmapOffset = reader.getLong
+  val soundCount = reader.getUInt
+  val soundOffset = reader.getLong
 }

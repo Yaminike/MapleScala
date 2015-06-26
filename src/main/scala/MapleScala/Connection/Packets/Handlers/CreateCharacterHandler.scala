@@ -1,12 +1,10 @@
 package MapleScala.Connection.Packets.Handlers
 
-import MapleScala.Client.{MapleJob, MapleCharacter}
+import MapleScala.Client.{MapleCharacter, MapleJob}
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
-import MapleScala.Data.Character
-import akka.io.Tcp.Abort
-
+import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
 import MapleScala.Data
+import akka.io.Tcp.Abort
 
 /**
  * Copyright 2015 Yaminike
@@ -25,7 +23,7 @@ import MapleScala.Data
  */
 object CreateCharacterHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
-    val name: String = packet.getMapleString
+    val name: String = packet.getString
     if (!MapleCharacter.isValidName(name)) {
       client.connection ! Abort
       return
@@ -60,9 +58,9 @@ object CreateCharacterHandler extends PacketHandler {
     // Check if equips are valid
     if (
       !isValidEquip(top) ||
-      !isValidEquip(bottom)||
-      !isValidEquip(shoes)||
-      !isValidEquip(weapon)
+        !isValidEquip(bottom) ||
+        !isValidEquip(shoes) ||
+        !isValidEquip(weapon)
     ) {
       client.connection ! Abort
       return
@@ -77,7 +75,7 @@ object CreateCharacterHandler extends PacketHandler {
         // Aran
         character.job = MapleJob.Legend
       case _ =>
-        // Adventurer
+      // Adventurer
     }
 
     character.save()
@@ -91,7 +89,7 @@ object CreateCharacterHandler extends PacketHandler {
       .empty(1)
     character.addCharEntry(pw, viewall = false)
 
-    return pw
+    pw
   }
 
 

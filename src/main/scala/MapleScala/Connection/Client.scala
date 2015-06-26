@@ -4,7 +4,6 @@ import MapleScala.Authorization.AuthRequest
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
-import MapleScala.Data.User
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io._
 

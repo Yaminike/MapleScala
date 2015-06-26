@@ -36,7 +36,7 @@ object RegisterPinHandler extends PacketHandler {
           val response = result.asInstanceOf[AuthResponse.GetStatus]
           if (response.status.contains(AuthStatus.LoggedIn) &&
             (response.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
-            val pin = packet.getMapleString
+            val pin = packet.getString
             if (pin.forall(_.isDigit)) {
               user.pin = Option(pin.toInt)
               user.save()

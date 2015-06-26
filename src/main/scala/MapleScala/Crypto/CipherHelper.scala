@@ -59,7 +59,7 @@ class CipherHelper(final val client: Client) {
     decryptShanda(result)
 
     // Create result
-    new PacketReader(ByteBuffer.wrap(result).order(ByteOrder.LITTLE_ENDIAN))
+    new PacketReader(ByteBuffer.wrap(result))
   }
 
   /**

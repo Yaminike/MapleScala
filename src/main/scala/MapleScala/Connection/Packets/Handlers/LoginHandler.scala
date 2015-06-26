@@ -29,8 +29,8 @@ object LoginHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
-    val username: String = packet.getMapleString
-    val password: String = packet.getMapleString
+    val username: String = packet.getString
+    val password: String = packet.getString
 
     val authRequest = client.auth ? new AuthRequest.Login(username, password)
     authRequest.onComplete({

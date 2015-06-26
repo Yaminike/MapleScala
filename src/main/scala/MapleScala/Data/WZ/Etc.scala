@@ -3,10 +3,9 @@ package MapleScala.Data.WZ
 import java.nio.ByteBuffer
 
 import MapleScala.Helper._
-import PKGNX.LazyNXFile
-import PKGNX.Nodes.{NXLongNode, NXStringNode}
+import MapleScala.PKG4._
 
-import scala.collection.mutable._
+import scala.collection.mutable
 
 /**
  * Copyright 2015 Yaminike
@@ -24,8 +23,8 @@ import scala.collection.mutable._
  * limitations under the License.
  */
 object Etc {
-  var allowedEquips: HashSet[Long] = new HashSet[Long]()
-  var forbiddenNames: MutableList[String] = new MutableList[String]()
+  val allowedEquips = new mutable.HashSet[Long]()
+  val forbiddenNames = new mutable.MutableList[String]()
 
   def load(): Unit = {
     var bytes: ByteBuffer = null
@@ -34,20 +33,15 @@ object Etc {
       bytes = GzipParser.readGzip(stream)
     })
 
-    val reader = new LazyNXFile(bytes)
-    for (node <- reader.resolve("MakeCharInfo.img/Info")) {
-      for (subNode <- node) {
-        // CharFemale | CharMale
-        for (valueNode <- subNode) {
-          val value = valueNode.asInstanceOf[NXLongNode].get()
-          if (value > 1e6)
-            allowedEquips += value
-        }
-      }
+    val reader = new PKG4Reader(bytes)
+    for (root <- reader.resolve("MakeCharInfo.img/Info"); node <- root; subNode <- node; valueNode <- subNode) {
+      val value = valueNode.value.asInstanceOf[Long]
+      if (value > 1e6)
+        allowedEquips += value
     }
 
-    for (node <- reader.resolve("ForbiddenName.img")) {
-      forbiddenNames += node.asInstanceOf[NXStringNode].get()
+    for (root <- reader.resolve("ForbiddenName.img"); node <- root) {
+      forbiddenNames += node.value.asInstanceOf[String].toLowerCase
     }
   }
 }

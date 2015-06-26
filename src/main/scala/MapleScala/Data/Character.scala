@@ -1,6 +1,6 @@
 package MapleScala.Data
 
-import MapleScala.Client.{MapleJob, MapleCharacter}
+import MapleScala.Client.{MapleCharacter, MapleJob}
 import scalikejdbc._
 
 /**
@@ -119,6 +119,6 @@ object Character
         mp = ${char.mp}, maxMp = ${char.maxMp}, ap = ${char.ap}, sp = ${char.sp}, exp = ${char.exp},
         fame = ${char.fame},gachaExp = ${char.gachaExp}, map = ${char.map}, spawnpoint = ${char.spawnpoint}
       WHERE id = ${char.id}"""
-    .update()
-    .apply()
+      .update()
+      .apply()
 }

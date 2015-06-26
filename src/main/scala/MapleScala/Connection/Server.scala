@@ -35,7 +35,7 @@ class Server(port: Int, auth: ActorRef) extends Actor {
 
   // TODO: Custom error logging
   override val supervisorStrategy =
-    OneForOneStrategy(loggingEnabled = true, maxNrOfRetries = 10, withinTimeRange = 1 minute) {
+    OneForOneStrategy(loggingEnabled = true, maxNrOfRetries = 10, withinTimeRange = 1.minute) {
       case _ => Restart // Try to keep it alive
     }
 

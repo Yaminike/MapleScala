@@ -42,7 +42,7 @@ object AfterLoginHandler extends PacketHandler {
         }
       case 1 =>
         if (state == 0) {
-          val pin = packet.getMapleString
+          val pin = packet.getString
           if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt)) {
             val authRequest = client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PinAccepted)
             authRequest.onComplete({
@@ -60,7 +60,7 @@ object AfterLoginHandler extends PacketHandler {
         }
       case 2 =>
         if (state == 0) {
-          val pin = packet.getMapleString
+          val pin = packet.getString
           if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt))
             pinOperation(client, Reasons.Register)
           else

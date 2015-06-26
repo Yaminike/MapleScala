@@ -1,8 +1,6 @@
-package MapleScala.Connection.Packets
+package MapleScala.PKG4
 
-import java.nio.ByteBuffer
-
-import MapleScala.Util.LittleEndianReader
+import scala.collection.mutable
 
 /**
  * Copyright 2015 Yaminike
@@ -19,6 +17,16 @@ import MapleScala.Util.LittleEndianReader
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class PacketReader(override val buffer: ByteBuffer)
-  extends LittleEndianReader(buffer) {
+final class PKG4Tables(reader: PKG4Reader) {
+  val strings = new mutable.HashMap[Long, String]
+
+  def getString(index: Long): String =
+    strings.getOrElse(index, {
+      reader.mark()
+      reader.seek(reader.header.stringOffset + index * 8)
+      reader.seek(reader.getLong)
+      strings.put(index, reader.getString)
+      reader.reset()
+      strings(index)
+    })
 }

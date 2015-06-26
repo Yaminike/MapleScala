@@ -3,8 +3,6 @@ package MapleScala.Connection.Packets.Handlers
 import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
-import MapleScala.Data
-import MapleScala.Data.WZ
 
 /**
  * Copyright 2015 Yaminike
@@ -23,7 +21,7 @@ import MapleScala.Data.WZ
  */
 object CheckCharacterNameHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
-    client.self ! charNameResponse(packet.getMapleString)
+    client.self ! charNameResponse(packet.getString)
   }
 
   def charNameResponse(name: String): PacketWriter = {

@@ -2,7 +2,7 @@ package MapleScala.Client
 
 import MapleScala.Connection.Packets.PacketWriter
 import MapleScala.Data
-import MapleScala.Data.{WZ, Character}
+import MapleScala.Data.{Character, WZ}
 
 /**
  * Copyright 2015 Yaminike
@@ -92,7 +92,7 @@ class MapleCharacter
       .empty(16) // TODO: pet equips, cash weapon
   }
 
-  override def save(): Unit ={
+  override def save(): Unit = {
     super.save()
     // TODO: Equips etc
   }
