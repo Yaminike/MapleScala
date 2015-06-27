@@ -53,7 +53,7 @@ object PacketDistributer {
       else
         handlers(header).handle(packet, client)
     } else if (defaultHandlers.contains(header)) {
-      defaultHandlers.get(header).get.handle(packet, client)
+      defaultHandlers(header).handle(packet, client)
     } else {
       println(f"Handler not found for 0x$header%04X")
     }

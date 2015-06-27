@@ -52,6 +52,7 @@ object Main extends App {
 
   def loadWzData(): Unit = {
     Data.WZ.Etc.load()
+    Data.WZ.Character.load()
   }
 }
 

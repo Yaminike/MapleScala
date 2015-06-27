@@ -38,11 +38,11 @@ final class PKG4Reader(override val buffer: ByteBuffer)
     val nodeType: Int = getUShort
 
     nodeType match {
-      case 0 => new PKG4NoneNode(this, name, childIndex, childCount)
       case 1 => new PKG4LongNode(this, name, childIndex, childCount)
       case 2 => new PKG4DoubleNode(this, name, childIndex, childCount)
       case 3 => new PKG4StringNode(this, name, childIndex, childCount)
       case 4 => new PKG4VectorNode(this, name, childIndex, childCount)
+      case _ => new PKG4NoneNode(this, name, childIndex, childCount)
     }
   }
 

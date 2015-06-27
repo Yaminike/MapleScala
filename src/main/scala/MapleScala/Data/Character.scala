@@ -1,6 +1,6 @@
 package MapleScala.Data
 
-import MapleScala.Client.{MapleCharacter, MapleJob}
+import MapleScala.Client.{MapleCharacter, MapleInventory, MapleJob}
 import scalikejdbc._
 
 /**
@@ -83,24 +83,25 @@ object Character
       gachaExp = rs.int("gachaExp")
       map = rs.int("map")
       spawnpoint = rs.byte("spawnpoint")
+      inventory = MapleInventory.getForCharacter(this)
     }
 
   def listForUser(user: User): List[MapleCharacter] = sql"SELECT * FROM characters WHERE userId = ${user.id}"
     .map(rs => Character(rs)).list().apply()
 
   def nameAvailable(name: String): Boolean = sql"SELECT COUNT(id) AS num FROM characters WHERE name = $name"
-    .map(rs => rs.int("num")).first().apply().get == 0
+    .map(rs => rs.int("num")).first().apply().getOrElse(0) == 0
 
   def insert(char: Character) = {
     char.id = sql"""
-      INSERT INTO characters
-       (userId, name, world, gender, skinColor,
+      INSERT INTO characters (
+        userId, name, world, gender, skinColor,
         face, hair, level, job, str,
         dex, `int`, luk, hp, maxHp,
         mp, maxMp, ap, sp, exp,
-        fame, gachaExp, map, spawnpoint)
-      VALUES
-        (${char.userId}, ${char.name}, ${char.world}, ${char.gender}, ${char.skinColor},
+        fame, gachaExp, map, spawnpoint
+      ) VALUES (
+        ${char.userId}, ${char.name}, ${char.world}, ${char.gender}, ${char.skinColor},
         ${char.face}, ${char.hair}, ${char.level}, ${char.job}, ${char.str},
         ${char.dex}, ${char.int}, ${char.luk}, ${char.hp}, ${char.maxHp},
         ${char.mp}, ${char.maxMp}, ${char.ap}, ${char.sp}, ${char.exp},
@@ -110,8 +111,7 @@ object Character
       .toInt
   }
 
-  def update(char: Character) =
-    sql"""
+  def update(char: Character) = sql"""
       UPDATE characters SET
         userId = ${char.userId}, name = ${char.name}, world = ${char.world}, gender = ${char.gender}, skinColor = ${char.skinColor},
         face = ${char.face}, hair = ${char.hair}, level = ${char.level}, job = ${char.job}, str = ${char.str},
@@ -119,6 +119,6 @@ object Character
         mp = ${char.mp}, maxMp = ${char.maxMp}, ap = ${char.ap}, sp = ${char.sp}, exp = ${char.exp},
         fame = ${char.fame},gachaExp = ${char.gachaExp}, map = ${char.map}, spawnpoint = ${char.spawnpoint}
       WHERE id = ${char.id}"""
-      .update()
-      .apply()
+    .update()
+    .apply()
 }

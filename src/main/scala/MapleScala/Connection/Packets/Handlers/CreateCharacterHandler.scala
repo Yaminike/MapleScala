@@ -1,6 +1,7 @@
 package MapleScala.Connection.Packets.Handlers
 
-import MapleScala.Client.{MapleCharacter, MapleJob}
+import MapleScala.Client.MapleInventory.Types._
+import MapleScala.Client.{MapleCharacter, MapleItem, MapleJob}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
 import MapleScala.Data
@@ -41,7 +42,11 @@ object CreateCharacterHandler extends PacketHandler {
     }
 
     val character = MapleCharacter.getDefault
-    character.userId = client.loginstate.user.get.id
+
+    for (user <- client.loginstate.user) {
+      character.userId = user.id
+    }
+
     character.world = client.loginstate.world
     character.name = name
     character.face = face
@@ -71,12 +76,20 @@ object CreateCharacterHandler extends PacketHandler {
       case 0 =>
         // Knights of Cygnus
         character.job = MapleJob.Noblesse
+        character.inventory.addItem(Etc)(new MapleItem(4161047, 0, 1))
       case 2 =>
         // Aran
         character.job = MapleJob.Legend
+        character.inventory.addItem(Etc)(new MapleItem(4161048, 0, 1))
       case _ =>
-      // Adventurer
+        // Adventurer
+        character.inventory.addItem(Etc)(new MapleItem(4161001, 0, 1))
     }
+
+    character.inventory.addItem(Equipped)(MapleItem.getDefault(top, 5))
+    character.inventory.addItem(Equipped)(MapleItem.getDefault(bottom, 6))
+    character.inventory.addItem(Equipped)(MapleItem.getDefault(shoes, 7))
+    character.inventory.addItem(Equipped)(MapleItem.getDefault(weapon, 11))
 
     character.save()
 

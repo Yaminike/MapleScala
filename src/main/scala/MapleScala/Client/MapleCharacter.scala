@@ -1,5 +1,6 @@
 package MapleScala.Client
 
+import MapleScala.Client.MapleInventory.Types
 import MapleScala.Connection.Packets.PacketWriter
 import MapleScala.Data
 import MapleScala.Data.{Character, WZ}
@@ -32,9 +33,11 @@ object MapleCharacter {
 class MapleCharacter
   extends Character {
 
+  var inventory = new MapleInventory(this)
+
   def addCharEntry(pw: PacketWriter, viewall: Boolean): Unit = {
     addCharStats(pw)
-    addCharLook(pw, false)
+    addCharLook(pw, mega = false)
     if (!viewall)
       pw.empty(1)
 
@@ -86,14 +89,44 @@ class MapleCharacter
   def addCharEquips(pw: PacketWriter): Unit = {
     val sep: Byte = -1
 
-    pw
-      .write(sep)
-      .write(sep)
-      .empty(16) // TODO: pet equips, cash weapon
+    val maskedEquips = inventory.getItems(Types.Equipped).filter(item => item.position >= 100)
+
+    val equips = inventory.getItems(Types.Equipped).map(item => {
+      val mask = maskedEquips.find(x => x.position - 100 == item.position && x.position != 111)
+      val ret = mask.getOrElse(item)
+      ret.position = item.position
+      ret
+    })
+
+    // Normal equips
+    for (item <- equips) {
+      pw
+        .write(item.position)
+        .write(item.itemId)
+    }
+    pw.write(sep)
+
+    // Masked equips
+    for (item <- maskedEquips) {
+      pw
+        .write(item.position - 100)
+        .write(item.itemId)
+    }
+    pw.write(sep)
+
+    // Cash weapon
+    val cWeapon = maskedEquips.find(x => x.position == 111)
+    if (cWeapon.nonEmpty)
+      pw.write(cWeapon.get.itemId)
+    else
+      pw.write(0)
+
+    // TODO: pet equips
+    pw.empty(12)
   }
 
   override def save(): Unit = {
     super.save()
-    // TODO: Equips etc
+    inventory.save()
   }
 }
