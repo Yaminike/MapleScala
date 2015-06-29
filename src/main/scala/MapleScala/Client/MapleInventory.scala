@@ -25,7 +25,7 @@ object MapleInventory {
     val items = Item.getForCharacter(character)
     val inv = new MapleInventory(character)
     for (value <- Types.values) {
-      items.filter(_.invType == value.id).foreach(inv.addItem(value)(_))
+      inv.addItems(value)(items.filter(_.invType == value.id))
     }
     inv
   }
@@ -76,6 +76,8 @@ class MapleInventory(character: MapleCharacter) {
     items(invType) += mapleItem
     true
   }
+
+  private def addItems(invType: MapleInventory.Types.Value)(list: Seq[MapleItem]): Unit = items(invType) ++= list
 
   def getItems(invType: MapleInventory.Types.Value): mutable.MutableList[MapleItem] = items(invType)
 

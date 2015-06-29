@@ -1,7 +1,9 @@
 package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Connection.Packets.PacketReader
+import akka.io.Tcp.Abort
+import io.github.nremond.SecureHash
 
 /**
  * Copyright 2015 Yaminike
@@ -18,31 +20,25 @@ import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object CharacterlistRequestHandler extends PacketHandler {
+object RegisterPicHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
-    packet.skip(1)
-
-    client.loginstate.world = packet.getByte
-    client.loginstate.channel = packet.getByte
-
-    showCharacterlist(client)
-  }
-
-  def showCharacterlist(client: Client): Unit = {
     for (user <- client.loginstate.user) {
-      val characters = user.getCharacters.filter(_.world == client.loginstate.world)
+      if (user.pic.nonEmpty) {
+        client.connection ! Abort // Trying to register a pin while already having one registered
+        return
+      }
 
-      val pw = new PacketWriter()
-        .write(SendOpcode.Characterlist)
-        .write(0.toByte)
-        .write(characters.length.toByte) // Amount of characters
+      packet.skip(1)
 
-      characters.foreach(_.addCharEntry(pw, viewall = false))
+      val charId = packet.getInt
 
-      pw.write(user.pic.nonEmpty) // 2 = pic disabled?
-      pw.write(9) // TODO: Character slots
+      packet.skip(packet.getShort) // Mac address?
+      packet.skip(packet.getShort) // Unk
 
-      client.self ! pw
+      user.pic = Some(SecureHash.createHash(packet.getString))
+      user.save()
+
+      // Todo: Migrate
     }
   }
 }

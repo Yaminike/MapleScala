@@ -40,8 +40,12 @@ object PacketDistributer {
     RegisterPin -> RegisterPinHandler,
     ServerlistRequest -> ServerlistRequestHandler,
     PlayerDisconnect -> EmptyHandler,
+    ViewAllCharacters -> ViewAllCharactersHandler,
+    ViewAllCharactersCancel -> EmptyHandler,
+
     CheckCharacterName -> CheckCharacterNameHandler,
-    CreateCharacter -> CreateCharacterHandler
+    CreateCharacter -> CreateCharacterHandler,
+    RegisterPic -> RegisterPicHandler
   )
 
   def distribute(packet: PacketReader, client: Client): Unit = {

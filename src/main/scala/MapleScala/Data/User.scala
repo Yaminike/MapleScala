@@ -24,16 +24,19 @@ class User
   var id: Int = 0
   var name: String = ""
   var password: String = ""
-  var isGM: Boolean = false
+  var pic: Option[String] = None
   var pin: Option[Int] = None
+  var isGM: Boolean = false
 
   def getCharacters: List[MapleCharacter] = Character.listForUser(this)
 
   def validatePassword(password: String): Boolean = SecureHash.validatePassword(password, this.password)
 
+  def validatePIC(pic: String): Boolean = SecureHash.validatePassword(pic, this.pic.getOrElse(""))
+
   def validatePIN(pin: Int): Boolean = pin == this.pin.getOrElse(-1) // I figured hashing it would be utterly useless
 
-  def save(): Unit = sql"UPDATE users SET name = $name, password = $password, isGM = $isGM, pin = $pin WHERE id = $id"
+  def save(): Unit = sql"UPDATE users SET name = $name, password = $password, pic = $pic, pin = $pin, isGM = $isGM WHERE id = $id"
     .update()
     .apply()
 }
@@ -46,8 +49,9 @@ object User
       id = rs.int("id")
       name = rs.string("name")
       password = rs.string("password")
-      isGM = rs.boolean("isGM")
+      pic = rs.stringOpt("pic")
       pin = rs.intOpt("pin")
+      isGM = rs.boolean("isGM")
     }
 
   def getById(id: Int): Option[User] = sql"SELECT * FROM users WHERE id = $id"

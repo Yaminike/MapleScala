@@ -24,11 +24,14 @@ object RecvOpcode {
   final val RegisterPin: Short = 0x000A
   final val ServerlistRequest: Short = 0x000B
   final val PlayerDisconnect: Short = 0x000C
+  final val ViewAllCharacters: Short = 0x000D
+  final val ViewAllCharactersCancel: Short = 0x000F
 
   final val CheckCharacterName: Short = 0x0015
   final val CreateCharacter: Short = 0x0016
   final val Pong: Short = 0x0018
   final val ClientStartError: Short = 0x0019
+  final val RegisterPic: Short = 0x001D
 
   final val MapLogin: Short = 0x0023
 }
@@ -38,6 +41,7 @@ object SendOpcode {
   final val Serverstatus: Short = 0x0003
   final val CheckPin: Short = 0x0006
   final val UpdatePin: Short = 0x0007
+  final val ViewAllCharacters: Short = 0x0008
   final val Serverlist: Short = 0x000A
   final val Characterlist: Short = 0x000B
   final val CharacterNameResponse: Short = 0x000D

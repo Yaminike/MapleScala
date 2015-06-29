@@ -28,8 +28,9 @@ CREATE TABLE `users` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `password` varchar(150) NOT NULL,
-  `isGM` bit(1) NOT NULL,
+  `pic` varchar(150) DEFAULT NULL,
   `pin` int(4) DEFAULT NULL,
+  `isGM` bit(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
@@ -38,7 +39,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Admin','$pbkdf2-sha512$20000$r58eHRueKC.voGHqaYduyi4jcOPIN0AW$XEdOCHYphlZ.ewxmr8Mtz94TEOkiO8a0imL4i6G1D28',1,0);
+INSERT INTO `users` VALUES (1,'Admin','$pbkdf2-sha512$20000$r58eHRueKC.voGHqaYduyi4jcOPIN0AW$XEdOCHYphlZ.ewxmr8Mtz94TEOkiO8a0imL4i6G1D28',NULL,0,1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
