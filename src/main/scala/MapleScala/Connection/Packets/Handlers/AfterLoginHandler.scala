@@ -53,10 +53,10 @@ object AfterLoginHandler extends PacketHandler {
               pinOperation(client, Reasons.RequestAfterFailure)
             }
           } else if (state == 1) {
-            if (user.pin.nonEmpty)
-              pinOperation(client, Reasons.Request)
-            else
-              pinOperation(client, Reasons.Register)
+            user.pin match {
+              case Some(pin) => pinOperation(client, Reasons.Request)
+              case None => pinOperation(client, Reasons.Register)
+            }
           }
         case 2 =>
           if (state == 0) {

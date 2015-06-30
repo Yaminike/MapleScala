@@ -45,17 +45,18 @@ object PacketDistributer {
 
     CheckCharacterName -> CheckCharacterNameHandler,
     CreateCharacter -> CreateCharacterHandler,
-    RegisterPic -> RegisterPicHandler
+    RegisterPic -> RegisterPicHandler,
+    CharacterSelectWithPic -> CharacterSelectWithPicHandler
   )
 
   def distribute(packet: PacketReader, client: Client): Unit = {
     val header: Short = packet.getShort
 
     if (handlers.contains(header)) {
-      if (client.loginstate.user.isEmpty)
-        client.connection ! Abort
-      else
-        handlers(header).handle(packet, client)
+      client.loginstate.user match {
+        case Some(user) => handlers(header).handle(packet, client)
+        case None => client.connection ! Abort
+      }
     } else if (defaultHandlers.contains(header)) {
       defaultHandlers(header).handle(packet, client)
     } else {

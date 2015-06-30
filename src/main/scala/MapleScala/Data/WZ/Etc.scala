@@ -24,7 +24,7 @@ import scala.collection.mutable
  */
 object Etc {
   val allowedEquips = new mutable.HashSet[Long]()
-  val forbiddenNames = new mutable.MutableList[String]()
+  val forbiddenNames = mutable.Set[String]()
 
   def load(): Unit = {
     var bytes: ByteBuffer = null

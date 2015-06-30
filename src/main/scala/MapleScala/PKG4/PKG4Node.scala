@@ -65,45 +65,9 @@ sealed trait PKG4Node
     populateChildren()
 
     if (isMapped)
-      return childrenMap.get(name)
-
-    var min: Int = 0
-    var max: Int = childCount - 1
-    var minVal: String = children(min).name
-    var maxVal: String = children(max).name
-
-    while (true) {
-      if (name.compareTo(minVal) <= 0) {
-        if (name.equals(minVal))
-          return Some(children(min))
-        else
-          return None
-      }
-
-      if (name.compareTo(maxVal) >= 0) {
-        if (name.equals(maxVal))
-          return Some(children(max))
-        else
-          return None
-      }
-
-      val pivot = (min + max) >> 1
-      val pivotVal = children(pivot).name
-
-      if (name.compareTo(pivotVal) > 0) {
-        min = pivot + 1
-        max -= 1
-      } else if (name.equals(pivotVal)) {
-        return Some(children(pivot))
-      } else {
-        min += 1
-        max = pivot - 1
-      }
-
-      minVal = children(min).name
-      maxVal = children(max).name
-    }
-    None
+      childrenMap.get(name)
+    else
+      children.find(_.name == name)
   }
 
   override def iterator: Iterator[PKG4Node] = {

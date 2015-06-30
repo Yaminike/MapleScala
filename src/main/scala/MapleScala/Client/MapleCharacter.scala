@@ -115,11 +115,10 @@ class MapleCharacter
     pw.write(sep)
 
     // Cash weapon
-    val cWeapon = maskedEquips.find(x => x.position == 111)
-    if (cWeapon.nonEmpty)
-      pw.write(cWeapon.get.itemId)
-    else
-      pw.write(0)
+    maskedEquips.find(x => x.position == 111) match {
+      case Some(weapon) => pw.write(weapon.itemId)
+      case None => pw.write(0)
+    }
 
     // TODO: pet equips
     pw.empty(12)

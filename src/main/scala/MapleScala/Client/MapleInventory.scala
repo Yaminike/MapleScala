@@ -40,13 +40,13 @@ class MapleInventory(character: MapleCharacter) {
 
   import MapleInventory.Types._
 
-  private val items: Map[MapleInventory.Types.Value, mutable.MutableList[MapleItem]] = Map(
-    Equipped -> mutable.MutableList[MapleItem](),
-    Equip -> mutable.MutableList[MapleItem](),
-    Use -> mutable.MutableList[MapleItem](),
-    Setup -> mutable.MutableList[MapleItem](),
-    Etc -> mutable.MutableList[MapleItem](),
-    Cash -> mutable.MutableList[MapleItem]()
+  private val items: Map[MapleInventory.Types.Value, mutable.Set[MapleItem]] = Map(
+    Equipped -> mutable.Set[MapleItem](),
+    Equip -> mutable.Set[MapleItem](),
+    Use -> mutable.Set[MapleItem](),
+    Setup -> mutable.Set[MapleItem](),
+    Etc -> mutable.Set[MapleItem](),
+    Cash -> mutable.Set[MapleItem]()
   )
 
   private val slots: Map[MapleInventory.Types.Value, Byte] = Map(
@@ -73,13 +73,13 @@ class MapleInventory(character: MapleCharacter) {
     }
 
     mapleItem.invType = invType.id
-    items(invType) += mapleItem
+    items(invType) add mapleItem
     true
   }
 
   private def addItems(invType: MapleInventory.Types.Value)(list: Seq[MapleItem]): Unit = items(invType) ++= list
 
-  def getItems(invType: MapleInventory.Types.Value): mutable.MutableList[MapleItem] = items(invType)
+  def getItems(invType: MapleInventory.Types.Value): mutable.Set[MapleItem] = items(invType)
 
   def save(): Unit = {
     for (list <- items.values; item <- list) {

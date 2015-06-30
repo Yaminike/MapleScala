@@ -1,9 +1,7 @@
 package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.PacketReader
-import akka.io.Tcp.Abort
-import io.github.nremond.SecureHash
+import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
 
 /**
  * Copyright 2015 Yaminike
@@ -20,30 +18,28 @@ import io.github.nremond.SecureHash
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-object RegisterPicHandler extends PacketHandler {
+object CharacterSelectWithPicHandler extends PacketHandler {
   def handle(packet: PacketReader, client: Client): Unit = {
-    packet.skip(1)
+    val pic = packet.getString
     val charId = packet.getInt
-
     packet.skip(packet.getShort) // Mac address?
-    packet.skip(packet.getShort) // Unk
 
     for {
       user <- client.loginstate.user
       character <- user.getCharacter(charId)
     } {
-      if (user.pic.nonEmpty) {
-        client.connection ! Abort // Trying to register a pin while already having one registered
+      if (user.validatePIC(pic))
+      {
+        // Todo: Migrate
         return
       }
-
-      user.pic = Some(SecureHash.createHash(packet.getString))
-      user.save()
-
-      // Todo: Migrate
-      return
     }
 
-    client.connection ! Abort // Either no user, or no character found
+    client.self ! invalidPic // Either invalid pic, no user found or no character found
   }
+
+  def invalidPic: PacketWriter =
+    new PacketWriter()
+      .write(SendOpcode.CheckSPWResult)
+      .empty(1)
 }

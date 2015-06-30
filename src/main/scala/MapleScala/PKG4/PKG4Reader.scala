@@ -60,11 +60,11 @@ final class PKG4Reader(override val buffer: ByteBuffer)
   }
 
   def resolve(path: Seq[String]): Option[PKG4Node] = {
-    var cursor: Option[PKG4Node] = Some(getNode(0))
-    path.foldLeft(cursor) { (z, i) =>
-      if (cursor.nonEmpty)
-        cursor = z.get.getChild(i)
-      cursor
+    path.foldLeft[Option[PKG4Node]](Some(getNode(0))) { (cursor, piece) =>
+      cursor match {
+        case Some(cur) => cur.getChild(piece)
+        case None => cursor
+      }
     }
   }
 }

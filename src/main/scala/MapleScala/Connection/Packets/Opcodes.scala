@@ -32,6 +32,7 @@ object RecvOpcode {
   final val Pong: Short = 0x0018
   final val ClientStartError: Short = 0x0019
   final val RegisterPic: Short = 0x001D
+  final val CharacterSelectWithPic: Short = 0x001E
 
   final val MapLogin: Short = 0x0023
 }
@@ -49,4 +50,5 @@ object SendOpcode {
 
   final val Ping: Short = 0x0011
   final val DefaultWorld: Short = 0x001A
+  final val CheckSPWResult: Short = 0x001C
 }

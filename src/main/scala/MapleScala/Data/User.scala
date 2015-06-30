@@ -28,6 +28,8 @@ class User
   var pin: Option[Int] = None
   var isGM: Boolean = false
 
+  def getCharacter(id: Int): Option[MapleCharacter] = Character.getByUserAndId(this, id)
+
   def getCharacters: List[MapleCharacter] = Character.listForUser(this)
 
   def validatePassword(password: String): Boolean = SecureHash.validatePassword(password, this.password)

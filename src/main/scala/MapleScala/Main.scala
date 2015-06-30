@@ -28,8 +28,7 @@ object Main extends App {
     initDB()
     println("Finished initializing database")
 
-    loadWzData()
-    println("Finished loading WZ data")
+    Helper.time(loadWzData(), "Finished loading WZ data")
 
     val system = ActorSystem("MapleScala")
     val auth = system.actorOf(AuthHandler.create, "server-auth")

@@ -29,21 +29,20 @@ class AuthHandler extends Actor {
 
   def receive = {
     case req: AuthRequest.Login =>
-      val user: Option[User] = User.getByName(req.username)
-      if (user.isEmpty) {
-        sender ! new AuthResponse.Login(5, user)
-      } else if (!user.get.validatePassword(req.password)) {
-        sender ! new AuthResponse.Login(4, user)
-      } else {
-        users += user.get.id -> new AuthHolder {
-          status += AuthStatus.LoggedIn
-        }
-        sender ! new AuthResponse.Login(0, user)
+      User.getByName(req.username) match {
+        case Some(user) =>
+          if (!user.validatePassword(req.password)) {
+            sender ! new AuthResponse.Login(4, Some(user))
+          } else {
+            users += user.id -> new AuthHolder {
+              status += AuthStatus.LoggedIn
+            }
+            sender ! new AuthResponse.Login(0, Some(user))
+          }
+        case None => sender ! new AuthResponse.Login(5, None)
       }
 
-    case req: AuthRequest.Logout =>
-      if (users.contains(req.id))
-        users.remove(req.id)
+    case req: AuthRequest.Logout => users.remove(req.id)
 
     case req: AuthRequest.CheckLogin =>
       sender ! new AuthResponse.CheckLogin(users.contains(req.id))
