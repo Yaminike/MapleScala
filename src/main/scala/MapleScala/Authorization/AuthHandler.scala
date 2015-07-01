@@ -1,6 +1,7 @@
 package MapleScala.Authorization
 
 import MapleScala.Data.User
+import MapleScala.Util.ExpirationMap
 import akka.actor.{Actor, Props}
 
 import scala.collection.mutable
@@ -26,6 +27,7 @@ object AuthHandler {
 
 class AuthHandler extends Actor {
   val users: mutable.Map[Int, AuthHolder] = mutable.Map()
+  var migrations = new ExpirationMap[Int, MigrationHolder](10 * 1000)
 
   def receive = {
     case req: AuthRequest.Login =>
@@ -60,5 +62,21 @@ class AuthHandler extends Actor {
       } else {
         sender ! false
       }
+
+    case req: AuthRequest.Migrate =>
+      if (users.contains(req.userId) &&
+        users(req.userId).status == (AuthStatus.LoggedIn + AuthStatus.PinAccepted + AuthStatus.PicAccepted)) {
+
+        val key: Int = migrations.keys.reduceOption(_ max _).getOrElse(0) + 1
+        migrations += key -> new MigrationHolder(req.charId, req.channel)
+
+        sender ! new AuthResponse.Migrate(key)
+      } else {
+        sender ! new AuthResponse.Migrate(0)
+      }
+
+    case req: AuthRequest.GetMigration =>
+      for (data <- migrations.get(req.key))
+        sender ! new AuthResponse.GetMigration(data)
   }
 }

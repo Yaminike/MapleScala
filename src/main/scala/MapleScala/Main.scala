@@ -3,7 +3,7 @@ package MapleScala
 import MapleScala.Authorization.AuthHandler
 import MapleScala.Connection.Server
 import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import scalikejdbc._
 
 /**
@@ -23,8 +23,16 @@ import scalikejdbc._
  */
 object Main extends App {
   final lazy val conf = ConfigFactory.load()
+  final lazy val serverIp = conf.getString("server.ip")
+
+  /**
+   * A map of worldIds and their starting port
+   */
+  final var worldMap: Map[Int, Int] = Map()
 
   override def main(args: Array[String]): Unit = {
+    worldMap = Map.empty
+
     initDB()
     println("Finished initializing database")
 
@@ -33,6 +41,18 @@ object Main extends App {
     val system = ActorSystem("MapleScala")
     val auth = system.actorOf(AuthHandler.create, "server-auth")
     system.actorOf(Server.create(conf.getInt("server.ports.login"), auth), "server-login")
+
+    val worlds = conf.getConfigList("server.worlds").toArray.map(_.asInstanceOf[Config])
+    var lastPort = conf.getInt("server.ports.channel")
+    for (world <- worlds) {
+      val name = world.getString("name")
+      worldMap += world.getInt("id") -> lastPort
+
+      for (i <- 0 until world.getInt("channels")) {
+        system.actorOf(Server.create(lastPort, auth), s"server-$name-$i")
+        lastPort += 1
+      }
+    }
   }
 
   def initDB() = {

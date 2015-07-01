@@ -29,16 +29,14 @@ object RegisterPinHandler extends PacketHandler {
 
   def handle(packet: PacketReader, client: Client): Unit = {
     for (user <- client.loginstate.user) {
-      val authRequest = client.auth ? new AuthRequest.GetStatus(user.id)
-      authRequest.onComplete({
-        case Success(result) =>
+      (client.auth ? new AuthRequest.GetStatus(user.id)).onComplete({
+        case Success(response: AuthResponse.GetStatus) =>
           if (packet.getByte != 0) {
-            val response = result.asInstanceOf[AuthResponse.GetStatus]
             if (response.status.contains(AuthStatus.LoggedIn) &&
               (response.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
               val pin = packet.getString
               if (pin.forall(_.isDigit)) {
-                user.pin = Option(pin.toInt)
+                user.pin = Some(pin.toInt)
                 user.save()
               }
             }

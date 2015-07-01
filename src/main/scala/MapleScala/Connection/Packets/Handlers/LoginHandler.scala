@@ -32,10 +32,8 @@ object LoginHandler extends PacketHandler {
     val username: String = packet.getString
     val password: String = packet.getString
 
-    val authRequest = client.auth ? new AuthRequest.Login(username, password)
-    authRequest.onComplete({
-      case Success(result) =>
-        val response = result.asInstanceOf[AuthResponse.Login]
+    (client.auth ? new AuthRequest.Login(username, password)).onComplete({
+      case Success(response: AuthResponse.Login) =>
         if (response.result == 0) {
           client.loginstate.user = response.user
           for (user <- response.user) {

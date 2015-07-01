@@ -3,6 +3,7 @@ package MapleScala.Connection.Packets.Handlers
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
 import MapleScala.Main
+import com.typesafe.config.Config
 
 import scala.collection.JavaConversions._
 
@@ -22,9 +23,8 @@ import scala.collection.JavaConversions._
  * limitations under the License.
  */
 object ServerlistRequestHandler extends PacketHandler {
-  final val worlds = Main.conf.getStringList("server.worlds.names").toList
-  final val channels = Main.conf.getIntList("server.worlds.channels").toList
-  final val defaultWorld = Main.conf.getInt("server.worlds.default")
+  final val worlds = Main.conf.getConfigList("server.worlds")
+  final val defaultWorld = Main.conf.getInt("server.defaultWorld")
 
   def handle(packet: PacketReader, client: Client): Unit = {
     for (world <- worlds)
@@ -33,15 +33,16 @@ object ServerlistRequestHandler extends PacketHandler {
     selectDefaultWorld(client)
   }
 
-  private def createServerlist(client: Client, world: String): Unit = {
-    val index: Byte = worlds.indexOf(world).toByte
-    val channel: Byte = channels.get(index).toByte
+  private def createServerlist(client: Client, world: Config): Unit = {
+    val index: Byte = world.getInt("id").toByte
+    val channel: Byte = world.getInt("channels").toByte
+    val name: String = world.getString("name")
     val pw = new PacketWriter()
       .write(SendOpcode.Serverlist)
       .write(index)
-      .write(new MapleString(world))
+      .write(new MapleString(name))
       .write(0.toByte) // TODO: Flag
-      .write(new MapleString("")) // TODO: Eventmessage
+      .write(new MapleString(world.getString("event"))) // TODO: Eventmessage
       .write(100.toByte) // Rate modifier?
       .write(0.toByte) // Event exp * 2.6 ?
       .write(100.toByte) // Rate modifier?
@@ -50,7 +51,7 @@ object ServerlistRequestHandler extends PacketHandler {
       .write(channel) // Channel count
 
     for (i <- 0 until channel) {
-      pw.write(new MapleString(s"$world-${i + 1}"))
+      pw.write(new MapleString(s"$name-${i + 1}"))
         .write(0) // TODO: Channel load
         .write(true)
         .write(i.toShort)

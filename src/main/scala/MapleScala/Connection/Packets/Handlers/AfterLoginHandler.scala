@@ -44,8 +44,7 @@ object AfterLoginHandler extends PacketHandler {
           if (state == 0) {
             val pin = packet.getString
             if (pin.forall(_.isDigit) && user.validatePIN(pin.toInt)) {
-              val authRequest = client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PinAccepted)
-              authRequest.onComplete({
+              (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PinAccepted)).onComplete({
                 case Success(result) => pinOperation(client, Reasons.Accept)
                 case Failure(failure) => pinOperation(client, Reasons.RequestAfterFailure)
               })(client.context.dispatcher)

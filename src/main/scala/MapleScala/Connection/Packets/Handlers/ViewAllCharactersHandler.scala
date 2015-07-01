@@ -2,7 +2,7 @@ package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
+import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
 
 /**
  * Copyright 2015 Yaminike

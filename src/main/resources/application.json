@@ -5,17 +5,21 @@
       "login": 8484,
       "channel": 8485
     },
-    "worlds": {
-      "default": 0,
-      "names": [
-        "MapleScala",
-        "Test"
-      ],
-      "channels": [
-        10,
-        5
-      ]
-    }
+    "defaultWorld": 0,
+    "worlds": [
+      {
+        "id": 0,
+        "name": "MapleScala",
+        "channels": 10,
+        "event": ""
+      },
+      {
+        "id": 1,
+        "name": "Test",
+        "channels": 5,
+        "event": ""
+      }
+    ]
   },
   "db": {
     "driver": "com.mysql.jdbc.Driver",

@@ -25,4 +25,8 @@ object AuthResponse {
 
   case class GetStatus(status: AuthStatus.ValueSet)
 
+  case class Migrate(key: Int)
+
+  case class GetMigration(data: MigrationHolder)
+
 }

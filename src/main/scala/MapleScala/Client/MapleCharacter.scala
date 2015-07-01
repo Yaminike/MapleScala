@@ -1,7 +1,7 @@
 package MapleScala.Client
 
 import MapleScala.Client.MapleInventory.Types
-import MapleScala.Connection.Packets.PacketWriter
+import MapleScala.Connection.Packets.{PacketWriter, SendOpcode}
 import MapleScala.Data
 import MapleScala.Data.{Character, WZ}
 
@@ -34,6 +34,18 @@ class MapleCharacter
   extends Character {
 
   var inventory = new MapleInventory(this)
+
+  def getCharInfo(channel: Int): PacketWriter = {
+    new PacketWriter()
+      .write(SendOpcode.WarpToMap)
+      .write(channel)
+      .write(true)
+      .write(true)
+      .empty(2)
+      .write(MapleScala.Helper.random.nextInt())
+      .write(MapleScala.Helper.random.nextInt())
+      .write(MapleScala.Helper.random.nextInt())
+  }
 
   def addCharEntry(pw: PacketWriter, viewall: Boolean): Unit = {
     addCharStats(pw)

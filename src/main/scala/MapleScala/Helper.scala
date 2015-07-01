@@ -33,7 +33,7 @@ object Helper {
 
   def time[R](block: => R, message: String): R = {
     val t0 = System.nanoTime()
-    val result = block    // call-by-name
+    val result = block // call-by-name
     val passed = (System.nanoTime() - t0) / 1000000000.0
     println(s"$message in $passed seconds")
     result

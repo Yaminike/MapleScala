@@ -15,4 +15,4 @@ package MapleScala.Authorization
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class AuthHolder(var status: AuthStatus.ValueSet = AuthStatus.ValueSet())
+class MigrationHolder(val charId: Int, var channel: Byte)

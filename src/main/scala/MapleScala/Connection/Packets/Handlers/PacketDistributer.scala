@@ -28,6 +28,7 @@ object PacketDistributer {
     LoginPassword -> LoginHandler,
     ClientStartError -> EmptyHandler,
     MapLogin -> MapLoginHandler,
+    PlayerLoggedin -> PlayerLoggedinHandler,
     Pong -> EmptyHandler
   )
 

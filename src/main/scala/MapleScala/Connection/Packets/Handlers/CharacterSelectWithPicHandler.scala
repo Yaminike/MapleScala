@@ -1,7 +1,14 @@
 package MapleScala.Connection.Packets.Handlers
 
+import MapleScala.Authorization.{AuthRequest, AuthStatus}
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
+import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import akka.io.Tcp.Abort
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
  * Copyright 2015 Yaminike
@@ -19,6 +26,8 @@ import MapleScala.Connection.Packets.{SendOpcode, PacketWriter, PacketReader}
  * limitations under the License.
  */
 object CharacterSelectWithPicHandler extends PacketHandler {
+  implicit val timeout = Timeout(5.seconds)
+
   def handle(packet: PacketReader, client: Client): Unit = {
     val pic = packet.getString
     val charId = packet.getInt
@@ -28,9 +37,11 @@ object CharacterSelectWithPicHandler extends PacketHandler {
       user <- client.loginstate.user
       character <- user.getCharacter(charId)
     } {
-      if (user.validatePIC(pic))
-      {
-        // Todo: Migrate
+      if (user.validatePIC(pic)) {
+        (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PicAccepted)).onComplete({
+          case Success(result) => client.migrate(user.id, charId)
+          case Failure(failure) => client.connection ! Abort
+        })(client.context.dispatcher)
         return
       }
     }

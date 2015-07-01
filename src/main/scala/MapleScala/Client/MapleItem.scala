@@ -68,10 +68,10 @@ object MapleItem {
   def isDropRestricted(info: Map[String, Long]): Boolean = info.getOrElse("tradeBlock", 0l) == 1 || info.getOrElse("quest", 0l) == 1
 
   def isDropRestricted(itemId: Int): Boolean = {
-    for (info <- Data.WZ.Character.itemInfo.get(itemId)) {
-      return isDropRestricted(info)
+    Data.WZ.Character.itemInfo.get(itemId) match {
+      case Some(info) => isDropRestricted(info)
+      case None => false
     }
-    false
   }
 }
 

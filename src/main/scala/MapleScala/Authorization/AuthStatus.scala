@@ -19,4 +19,5 @@ object AuthStatus extends Enumeration {
   type AuthStatus = Value
   val LoggedIn = Value(0x01)
   val PinAccepted = Value(0x02)
+  val PicAccepted = Value(0x04)
 }

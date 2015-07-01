@@ -27,6 +27,7 @@ object RecvOpcode {
   final val ViewAllCharacters: Short = 0x000D
   final val ViewAllCharactersCancel: Short = 0x000F
 
+  final val PlayerLoggedin: Short = 0x0014
   final val CheckCharacterName: Short = 0x0015
   final val CreateCharacter: Short = 0x0016
   final val Pong: Short = 0x0018
@@ -45,10 +46,13 @@ object SendOpcode {
   final val ViewAllCharacters: Short = 0x0008
   final val Serverlist: Short = 0x000A
   final val Characterlist: Short = 0x000B
+  final val ServerIp: Short = 0x000C
   final val CharacterNameResponse: Short = 0x000D
   final val AddNewCharacter: Short = 0x000E
 
   final val Ping: Short = 0x0011
   final val DefaultWorld: Short = 0x001A
   final val CheckSPWResult: Short = 0x001C
+
+  final val WarpToMap: Short = 0x007D
 }

@@ -89,6 +89,9 @@ object Character
   def listForUser(user: User): List[MapleCharacter] = sql"SELECT * FROM characters WHERE userId = ${user.id}"
     .map(rs => Character(rs)).list().apply()
 
+  def getById(id: Int): Option[MapleCharacter] = sql"SELECT * FROM characters WHERE id = ${id}"
+    .map(rs => Character(rs)).first().apply()
+
   def getByUserAndId(user: User, id: Int): Option[MapleCharacter] = sql"SELECT * FROM characters WHERE userId = ${user.id} AND id = ${id}"
     .map(rs => Character(rs)).first().apply()
 

@@ -17,14 +17,18 @@ package MapleScala.Authorization
  */
 object AuthRequest {
 
-  class Login(val username: String, val password: String)
+  case class Login(username: String, password: String)
 
-  class Logout(val id: Int)
+  case class Logout(id: Int)
 
-  class CheckLogin(val id: Int)
+  case class CheckLogin(id: Int)
 
-  class GetStatus(val id: Int)
+  case class GetStatus(id: Int)
 
-  class SetStatus(val id: Int, val status: AuthStatus.AuthStatus)
+  case class SetStatus(id: Int, status: AuthStatus.AuthStatus)
+
+  case class Migrate(userId: Int, charId: Int, channel: Byte)
+
+  case class GetMigration(key: Int)
 
 }

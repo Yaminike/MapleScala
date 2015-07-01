@@ -1,9 +1,15 @@
 package MapleScala.Connection.Packets.Handlers
 
+import MapleScala.Authorization.{AuthRequest, AuthStatus}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
 import akka.io.Tcp.Abort
+import akka.pattern.ask
+import akka.util.Timeout
 import io.github.nremond.SecureHash
+
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 /**
  * Copyright 2015 Yaminike
@@ -21,6 +27,8 @@ import io.github.nremond.SecureHash
  * limitations under the License.
  */
 object RegisterPicHandler extends PacketHandler {
+  implicit val timeout = Timeout(5.seconds)
+
   def handle(packet: PacketReader, client: Client): Unit = {
     packet.skip(1)
     val charId = packet.getInt
@@ -40,7 +48,11 @@ object RegisterPicHandler extends PacketHandler {
       user.pic = Some(SecureHash.createHash(packet.getString))
       user.save()
 
-      // Todo: Migrate
+      (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PicAccepted)).onComplete({
+        case Success(result) => client.migrate(user.id, charId)
+        case Failure(failure) => client.connection ! Abort
+      })(client.context.dispatcher)
+
       return
     }
 

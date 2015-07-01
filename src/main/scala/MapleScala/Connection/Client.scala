@@ -1,11 +1,16 @@
 package MapleScala.Connection
 
-import MapleScala.Authorization.AuthRequest
+import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io._
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration._
+import scala.util.Success
 
 /**
  * Copyright 2015 Yaminike
@@ -30,6 +35,7 @@ object Client {
 }
 
 class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
+  implicit val timeout = Timeout(5.seconds)
 
   import Tcp._
 
@@ -50,12 +56,26 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
     self ! pw
   }
 
-  def logout() = {
+  def logout(): Unit = {
     for (user <- loginstate.user) {
       auth ! new AuthRequest.Logout(user.id)
       loginstate.user = None
-
     }
+  }
+
+  def migrate(userId: Int, charId: Int): Unit = {
+    (auth ? new AuthRequest.Migrate(userId, charId, loginstate.channel)).onComplete({
+      case Success(result: AuthResponse.Migrate) =>
+        self ! new PacketWriter()
+          .write(SendOpcode.ServerIp)
+          .empty(2)
+          .write(MapleScala.Main.serverIp.split('.').map(_.toByte))
+          .write(MapleScala.Main.worldMap.getOrElse(loginstate.world, 0).toShort)
+          .write(result.key)
+          .empty(5)
+
+      case _ => connection ! Abort
+    })(context.dispatcher)
   }
 
   private def disconnect() = {

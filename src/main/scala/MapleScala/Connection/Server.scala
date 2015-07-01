@@ -44,11 +44,11 @@ class Server(port: Int, auth: ActorRef) extends Actor {
       case _ => Stop // Always blame the client
     }
 
-  IO(Tcp) ! Bind(self, new InetSocketAddress(MapleScala.Main.conf.getString("server.ip"), port))
+  IO(Tcp) ! Bind(self, new InetSocketAddress(MapleScala.Main.serverIp, port))
 
   override def receive = {
     case Bound(localAddress) =>
-      println(s"Server is running on ${localAddress.getPort}")
+      println(s"Server is running on ${localAddress.getHostName}:${localAddress.getPort}")
     case CommandFailed(_: Bind) =>
       println("Server failed to start")
       context.stop(self)
