@@ -1,6 +1,7 @@
 package MapleScala.Crypto
 
-import MapleScala.Connection.Packets.{MapleString, PacketWriter}
+import MapleScala.Connection.Packets.PacketWriter
+import MapleScala.Util.Extensions._
 import org.scalatest._
 
 /**
@@ -32,7 +33,7 @@ class CipherHelperSpec extends FlatSpec with Matchers {
     cipher.SIV = 0xDEADBEEF
     val pw: PacketWriter = new PacketWriter
     val sTest: String = "testing encryption and decryption"
-    pw.write(new MapleString(sTest))
+    pw.write(sTest.toMapleString)
 
     for (i <- 0 until 10) {
       val pr = cipher.decrypt(cipher.encrypt(pw.result).asByteBuffer)

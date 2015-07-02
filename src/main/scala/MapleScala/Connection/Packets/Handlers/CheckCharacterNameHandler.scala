@@ -2,7 +2,8 @@ package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Util.Extensions._
 
 /**
  * Copyright 2015 Yaminike
@@ -27,7 +28,7 @@ object CheckCharacterNameHandler extends PacketHandler {
   def charNameResponse(name: String): PacketWriter = {
     new PacketWriter()
       .write(SendOpcode.CharacterNameResponse)
-      .write(new MapleString(name))
+      .write(name.toMapleString)
       .write(!MapleCharacter.isValidName(name))
   }
 }

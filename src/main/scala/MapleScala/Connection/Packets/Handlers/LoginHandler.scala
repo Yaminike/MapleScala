@@ -4,6 +4,7 @@ import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets._
 import MapleScala.Data.User
+import MapleScala.Util.Extensions._
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -56,7 +57,7 @@ object LoginHandler extends PacketHandler {
       .write(0.toByte) // Gender
       .write(user.isGM) // IsGM
       .write(0x80) // GMLevel? o-O
-      .write(new MapleString(user.name)) // Account Name
+      .write(user.name.toMapleString) // Account Name
       .write(0.toByte)
       .write(false) // IsQuietBanned
       .write(0L) // QuietBannedTime

@@ -1,8 +1,9 @@
 package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
-import MapleScala.Connection.Packets.{MapleString, PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
 import MapleScala.Main
+import MapleScala.Util.Extensions._
 import com.typesafe.config.Config
 
 import scala.collection.JavaConversions._
@@ -40,9 +41,9 @@ object ServerlistRequestHandler extends PacketHandler {
     val pw = new PacketWriter()
       .write(SendOpcode.Serverlist)
       .write(index)
-      .write(new MapleString(name))
+      .write(name.toMapleString)
       .write(0.toByte) // TODO: Flag
-      .write(new MapleString(world.getString("event"))) // TODO: Eventmessage
+      .write(world.getString("event").toMapleString) // TODO: Eventmessage
       .write(100.toByte) // Rate modifier?
       .write(0.toByte) // Event exp * 2.6 ?
       .write(100.toByte) // Rate modifier?
@@ -51,7 +52,7 @@ object ServerlistRequestHandler extends PacketHandler {
       .write(channel) // Channel count
 
     for (i <- 0 until channel) {
-      pw.write(new MapleString(s"$name-${i + 1}"))
+      pw.write(s"$name-${i + 1}".toMapleString)
         .write(0) // TODO: Channel load
         .write(true)
         .write(i.toShort)

@@ -50,7 +50,8 @@ object Item
     new MapleItem(rs.int("id"), rs.byte("position"), rs.short("amount")) {
       characterId = rs.int("characterId")
       itemId = rs.int("itemId")
-      stats = Itemstats.getForItem(itemId)
+      stats = Itemstats.getForItem(id)
+      invType = rs.int("type")
     }
 
   def getForCharacter(character: Character): List[MapleItem] =

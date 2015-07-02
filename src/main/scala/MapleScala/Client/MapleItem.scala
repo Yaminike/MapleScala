@@ -1,7 +1,9 @@
 package MapleScala.Client
 
+import MapleScala.Connection.Packets.PacketWriter
 import MapleScala.Data
 import MapleScala.Data.{Item, Itemstats}
+import MapleScala.Util.Extensions._
 
 /**
  * Copyright 2015 Yaminike
@@ -78,9 +80,66 @@ object MapleItem {
 class MapleItem(pItemId: Int, pPosition: Byte, pAmount: Short)
   extends Item {
 
-  itemId = pItemId
+  id = pItemId
   position = pPosition
   amount = pAmount
 
   def isEquip: Boolean = stats.nonEmpty
+
+  def addItemInfo(pw: PacketWriter, zeroPosition: Boolean = false): Unit = {
+    var pos: Int = position
+    if (pos > 100)
+      pos -= 100
+
+    if (!zeroPosition) {
+      if (isEquip)
+        pw.write(pos.toShort)
+      else
+        pw.write(pos.toByte)
+    }
+
+    pw
+      .write(invType.toByte)
+      .write(itemId)
+      .write(false) // TODO: isCash
+      .write(-1L.toMapleTime) // TODO: addExpirationTime
+
+    if (!isEquip) {
+      pw
+        .write(amount)
+        .write("".toMapleString) // TODO: Owner
+        .write(0.toShort) // TODO: figure out 'flag'
+
+      // TODO: isRechargeable
+
+      return
+    }
+
+    for (stats <- this.stats) {
+      pw.write(stats.slots)
+        .write(0.toByte) // TODO: level
+        .write(stats.str)
+        .write(stats.dex)
+        .write(stats.int)
+        .write(stats.luk)
+        .write(stats.hp)
+        .write(stats.mp)
+        .write(stats.wAtt)
+        .write(stats.mAtt)
+        .write(stats.wDef)
+        .write(stats.mDef)
+        .write(stats.acc)
+        .write(stats.eva)
+        .write(0.toShort) // TODO: hands
+        .write(stats.speed)
+        .write(stats.jump)
+        .write("".toMapleString) // TODO: Owner
+        .write(stats.flags.toShort)
+
+        // TODO: isCash
+        .empty(18)
+        .write(-2L.toMapleTime)
+        .write(-1)
+    }
+  }
 }

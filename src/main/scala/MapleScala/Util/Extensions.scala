@@ -1,6 +1,6 @@
-package MapleScala.PKG4
+package MapleScala.Util
 
-import scala.collection.mutable
+import MapleScala.Connection.Packets.MapleString
 
 /**
  * Copyright 2015 Yaminike
@@ -17,16 +17,19 @@ import scala.collection.mutable
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-final class PKG4Tables(reader: PKG4Reader) {
-  val strings = new mutable.LongMap[String]
+object Extensions {
 
-  def getString(index: Long): String =
-    strings.getOrElse(index, {
-      reader.mark()
-      reader.seek(reader.header.stringOffset + index * 8)
-      reader.seek(reader.getLong)
-      strings.put(index, reader.getString)
-      reader.reset()
-      strings(index)
-    })
+  implicit class ExtendedLong(val value: Long) extends AnyVal {
+    def toMapleTime: Long = value match {
+      case -1 => 150842304000000000L // DEFAULT_TIME
+      case -2 => 94354848000000000L // ZERO_TIME
+      case -3 => 150841440000000000L // PERMANENT
+      case _ => value * 10000 + 116444592000000000L // FT_UT_OFFSET
+    }
+  }
+
+  implicit class ExtendedString(val value: String) extends AnyVal {
+    def toMapleString: MapleString = new MapleString(value)
+  }
+
 }

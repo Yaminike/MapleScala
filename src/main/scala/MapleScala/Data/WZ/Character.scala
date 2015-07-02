@@ -24,7 +24,7 @@ import scala.util.Try
  * limitations under the License.
  */
 object Character {
-  val itemInfo = new mutable.HashMap[Int, Map[String, Long]]()
+  val itemInfo = new mutable.LongMap[Map[String, Long]]()
 
   def load(): Unit = {
     var bytes: ByteBuffer = null
@@ -38,7 +38,7 @@ object Character {
       root <- reader.resolve("/")
       typeNode <- root.filterNot(x => x.name.endsWith(".img"))
       itemNode <- typeNode
-      itemId <- Try(itemNode.name.stripSuffix(".img").toInt)
+      itemId <- Try(itemNode.name.stripSuffix(".img").toLong)
       infoNode <- itemNode.getChild("info")
     } {
       itemInfo += itemId -> infoNode

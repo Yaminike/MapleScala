@@ -31,7 +31,14 @@ object MapleInventory {
   }
 
   object Types extends Enumeration {
-    val Equipped, Equip, Use, Setup, Etc, Cash = Value
+    type Types = Value
+
+    val Equipped = Value(-1)
+    val Equip = Value(1)
+    val Use = Value(2)
+    val Setup = Value(3)
+    val Etc = Value(4)
+    val Cash = Value(5)
   }
 
 }
@@ -80,6 +87,8 @@ class MapleInventory(character: MapleCharacter) {
   private def addItems(invType: MapleInventory.Types.Value)(list: Seq[MapleItem]): Unit = items(invType) ++= list
 
   def getItems(invType: MapleInventory.Types.Value): mutable.Set[MapleItem] = items(invType)
+
+  def getSlots(invType: MapleInventory.Types.Value): Byte = slots(invType)
 
   def save(): Unit = {
     for (list <- items.values; item <- list) {

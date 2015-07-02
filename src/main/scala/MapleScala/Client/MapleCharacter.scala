@@ -4,6 +4,7 @@ import MapleScala.Client.MapleInventory.Types
 import MapleScala.Connection.Packets.{PacketWriter, SendOpcode}
 import MapleScala.Data
 import MapleScala.Data.{Character, WZ}
+import MapleScala.Util.Extensions._
 
 /**
  * Copyright 2015 Yaminike
@@ -33,18 +34,103 @@ object MapleCharacter {
 class MapleCharacter
   extends Character {
 
-  var inventory = new MapleInventory(this)
+  lazy val inventory = MapleInventory.getForCharacter(this)
 
-  def getCharInfo(channel: Int): PacketWriter = {
-    new PacketWriter()
+  def getCharacterInfo(channel: Int): PacketWriter = {
+    val pw = new PacketWriter()
       .write(SendOpcode.WarpToMap)
       .write(channel)
       .write(true)
       .write(true)
       .empty(2)
-      .write(MapleScala.Helper.random.nextInt())
-      .write(MapleScala.Helper.random.nextInt())
-      .write(MapleScala.Helper.random.nextInt())
+
+    for (i <- 0 until 3)
+      pw.write(MapleScala.Helper.random.nextInt())
+
+    addCharacterInfo(pw)
+
+    pw.write(System.currentTimeMillis().toMapleTime)
+  }
+
+  def addCharacterInfo(pw: PacketWriter): Unit = {
+    pw
+      .write(-1L)
+      .empty(1)
+
+    addCharStats(pw)
+
+    pw
+      .empty(1)
+      .write(false) // TODO: LinkedName
+      .write(meso)
+
+    addInventoryInfo(pw)
+    addSkillInfo(pw)
+    addQuestInfo(pw)
+    addRingInfo(pw)
+    addTeleportInfo(pw)
+    addMonsterBookInfo(pw)
+    pw.empty(6) // Unk?
+  }
+
+  def addMonsterBookInfo(pw: PacketWriter): Unit = {
+    // TODO: MonsterBookInfo
+    pw.write(0) // TODO: Cover?
+      .empty(3)
+  }
+
+  def addTeleportInfo(pw: PacketWriter): Unit = {
+    // TODO: Teleport rocks
+    for (i <- 0 until 5)
+      pw.write(999999999)
+    for (i <- 0 until 10)
+      pw.write(999999999)
+  }
+
+  def addRingInfo(pw: PacketWriter): Unit = {
+    // TODO: RingInfo
+    pw.empty(6)
+  }
+
+  def addQuestInfo(pw: PacketWriter): Unit = {
+    // TODO: QuestInfo
+    pw.empty(4)
+    pw.empty(2)
+  }
+
+  def addSkillInfo(pw: PacketWriter): Unit = {
+    // TODO: SkillInfo
+    pw.empty(4)
+  }
+
+  def addInventoryInfo(pw: PacketWriter): Unit = {
+    pw
+      .write(inventory.getSlots(Types.Equip))
+      .write(inventory.getSlots(Types.Use))
+      .write(inventory.getSlots(Types.Setup))
+      .write(inventory.getSlots(Types.Etc))
+      .write(inventory.getSlots(Types.Cash))
+      .write(-2L.toMapleTime)
+
+    // Normal Equips
+    inventory.getItems(Types.Equipped).filter(_.position < 100).foreach(_.addItemInfo(pw))
+    pw.empty(2)
+
+    // Cash Equips
+    inventory.getItems(Types.Equipped).filter(_.position >= 100).foreach(_.addItemInfo(pw))
+    pw.empty(2)
+
+    // Start of the non-equipped items
+    inventory.getItems(Types.Equip).foreach(_.addItemInfo(pw))
+    pw.empty(4)
+    inventory.getItems(Types.Use).foreach(_.addItemInfo(pw))
+    pw.empty(1)
+    inventory.getItems(Types.Setup).foreach(_.addItemInfo(pw))
+    pw.empty(1)
+    inventory.getItems(Types.Etc).foreach(_.addItemInfo(pw))
+    pw.empty(1)
+    inventory.getItems(Types.Cash).foreach(_.addItemInfo(pw))
+    pw.empty(1)
   }
 
   def addCharEntry(pw: PacketWriter, viewall: Boolean): Unit = {
@@ -101,7 +187,7 @@ class MapleCharacter
   def addCharEquips(pw: PacketWriter): Unit = {
     val sep: Byte = -1
 
-    val maskedEquips = inventory.getItems(Types.Equipped).filter(item => item.position >= 100)
+    val maskedEquips = inventory.getItems(Types.Equipped).filter(_.position >= 100)
 
     val equips = inventory.getItems(Types.Equipped).map(item => {
       val mask = maskedEquips.find(x => x.position - 100 == item.position && x.position != 111)
@@ -127,7 +213,7 @@ class MapleCharacter
     pw.write(sep)
 
     // Cash weapon
-    maskedEquips.find(x => x.position == 111) match {
+    maskedEquips.find(_.position == 111) match {
       case Some(weapon) => pw.write(weapon.itemId)
       case None => pw.write(0)
     }

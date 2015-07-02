@@ -4,6 +4,7 @@ import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
+import MapleScala.Util.Extensions._
 import akka.actor.{Actor, ActorRef, Props}
 import akka.io._
 import akka.pattern.ask
@@ -86,12 +87,12 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
 
   private def handshake() = {
     val pw = new PacketWriter()
-    pw.write(0x0E.toShort)
-    pw.write(83.toShort) // Version
-    pw.write(new MapleString("1")) // SubVersion
-    pw.write(cipher.RIV)
-    pw.write(cipher.SIV)
-    pw.write(8.toByte)
+      .write(0x0E.toShort)
+      .write(83.toShort) // Version
+      .write("1".toMapleString) // SubVersion
+      .write(cipher.RIV)
+      .write(cipher.SIV)
+      .write(8.toByte)
     connection ! Write(pw.result)
   }
 }

@@ -35,14 +35,14 @@ object PlayerLoggedinHandler extends PacketHandler {
     (client.auth ? new AuthRequest.GetMigration(key)).onComplete({
       case Success(response: AuthResponse.GetMigration) =>
         Character.getById(response.data.charId) match {
-          case Some(player) => createResponse(player, response.data.channel)
+          case Some(player) => createResponse(player, client, response.data.channel)
           case None => client.connection ! Abort
         }
       case _ => client.connection ! Abort
     })(client.context.dispatcher)
   }
 
-  def createResponse(player: MapleCharacter, channel: Byte): Unit = {
-    println("")
+  def createResponse(player: MapleCharacter, client: Client, channel: Byte): Unit = {
+    client.self ! player.getCharacterInfo(channel)
   }
 }

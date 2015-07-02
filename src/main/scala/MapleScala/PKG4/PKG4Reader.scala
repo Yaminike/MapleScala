@@ -26,7 +26,7 @@ final class PKG4Reader(override val buffer: ByteBuffer)
 
   val header = new PKG4Header(this)
   val tables = new PKG4Tables(this)
-  val nodes = new mutable.HashMap[Long, PKG4Node]
+  val nodes = new mutable.LongMap[PKG4Node]
 
   private def parseNode(index: Long): PKG4Node = {
     seek(header.nodeOffset + index * PKG4Node.size)

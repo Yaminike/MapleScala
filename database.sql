@@ -76,6 +76,7 @@ CREATE TABLE `characters` (
   `gachaExp` int(11) NOT NULL,
   `map` int(11) NOT NULL,
   `spawnpoint` tinyint(4) NOT NULL,
+  `meso` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `userId_idx` (`userId`),

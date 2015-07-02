@@ -1,6 +1,6 @@
 package MapleScala.Data
 
-import MapleScala.Client.{MapleCharacter, MapleInventory, MapleJob}
+import MapleScala.Client.{MapleCharacter, MapleJob}
 import scalikejdbc._
 
 /**
@@ -44,6 +44,7 @@ class Character {
   var gachaExp: Int = 0
   var map: Int = 0
   var spawnpoint: Byte = 0
+  var meso: Int = 0
 
   def save(): Unit = {
     if (id == 0)
@@ -83,7 +84,7 @@ object Character
       gachaExp = rs.int("gachaExp")
       map = rs.int("map")
       spawnpoint = rs.byte("spawnpoint")
-      inventory = MapleInventory.getForCharacter(this)
+      meso = rs.int("meso")
     }
 
   def listForUser(user: User): List[MapleCharacter] = sql"SELECT * FROM characters WHERE userId = ${user.id}"
@@ -105,13 +106,13 @@ object Character
         face, hair, level, job, str,
         dex, `int`, luk, hp, maxHp,
         mp, maxMp, ap, sp, exp,
-        fame, gachaExp, map, spawnpoint
+        fame, gachaExp, map, spawnpoint, meso
       ) VALUES (
         ${char.userId}, ${char.name}, ${char.world}, ${char.gender}, ${char.skinColor},
         ${char.face}, ${char.hair}, ${char.level}, ${char.job}, ${char.str},
         ${char.dex}, ${char.int}, ${char.luk}, ${char.hp}, ${char.maxHp},
         ${char.mp}, ${char.maxMp}, ${char.ap}, ${char.sp}, ${char.exp},
-        ${char.fame}, ${char.gachaExp}, ${char.map}, ${char.spawnpoint})"""
+        ${char.fame}, ${char.gachaExp}, ${char.map}, ${char.spawnpoint}, ${char.meso})"""
       .updateAndReturnGeneratedKey()
       .apply()
       .toInt
@@ -123,7 +124,7 @@ object Character
         face = ${char.face}, hair = ${char.hair}, level = ${char.level}, job = ${char.job}, str = ${char.str},
         dex = ${char.dex}, `int` = ${char.int}, luk = ${char.luk}, hp = ${char.hp}, maxHp = ${char.maxHp},
         mp = ${char.mp}, maxMp = ${char.maxMp}, ap = ${char.ap}, sp = ${char.sp}, exp = ${char.exp},
-        fame = ${char.fame},gachaExp = ${char.gachaExp}, map = ${char.map}, spawnpoint = ${char.spawnpoint}
+        fame = ${char.fame}, gachaExp = ${char.gachaExp}, map = ${char.map}, spawnpoint = ${char.spawnpoint}, meso = ${char.meso}
       WHERE id = ${char.id}"""
     .update()
     .apply()
