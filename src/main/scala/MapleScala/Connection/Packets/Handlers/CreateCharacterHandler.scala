@@ -100,7 +100,7 @@ object CreateCharacterHandler extends PacketHandler {
     val pw = new PacketWriter()
       .write(SendOpcode.AddNewCharacter)
       .empty(1)
-    character.addCharEntry(pw, viewall = false)
+    character.addCharacterEntry(pw, viewall = false)
 
     pw
   }

@@ -47,9 +47,7 @@ object ViewAllCharactersHandler extends PacketHandler {
       .write(world)
       .write(characters.length.toByte)
 
-    for (character <- characters) {
-      character.addCharEntry(pw, viewall = true)
-    }
+    characters.foreach(_.addCharacterEntry(pw, viewall = true))
 
     pw
   }

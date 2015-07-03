@@ -37,7 +37,7 @@ object CharacterlistRequestHandler extends PacketHandler {
         .write(0.toByte)
         .write(characters.length.toByte) // Amount of characters
 
-      characters.foreach(_.addCharEntry(pw, viewall = false))
+      characters.foreach(_.addCharacterEntry(pw, viewall = false))
 
       pw.write(user.pic.nonEmpty) // 2 = pic disabled?
       pw.write(9) // TODO: Character slots

@@ -25,7 +25,7 @@ object MapleCharacter {
   def isValidName(name: String): Boolean =
     name.length >= 4 &&
       name.length <= 13 &&
-      !WZ.Etc.forbiddenNames.exists(f => name.toLowerCase.contains(f)) &&
+      !WZ.Etc.forbiddenNames.exists(name.toLowerCase.contains) &&
       Data.Character.nameAvailable(name)
 
   def getDefault: MapleCharacter = new MapleCharacter
@@ -35,6 +35,18 @@ class MapleCharacter
   extends Character {
 
   lazy val inventory = MapleInventory.getForCharacter(this)
+
+  def addCharacterEntry(pw: PacketWriter, viewall: Boolean): Unit = {
+    addStats(pw)
+    addLook(pw, mega = false)
+    if (!viewall)
+      pw.empty(1)
+
+    // TODO: isGM
+
+    pw.write(true) // World rank enabled?
+    pw.empty(16) // TODO: Ranks?
+  }
 
   def getCharacterInfo(channel: Int): PacketWriter = {
     val pw = new PacketWriter()
@@ -47,17 +59,17 @@ class MapleCharacter
     for (i <- 0 until 3)
       pw.write(MapleScala.Helper.random.nextInt())
 
-    addCharacterInfo(pw)
+    addInfo(pw)
 
     pw.write(System.currentTimeMillis().toMapleTime)
   }
 
-  def addCharacterInfo(pw: PacketWriter): Unit = {
+  private def addInfo(pw: PacketWriter): Unit = {
     pw
       .write(-1L)
       .empty(1)
 
-    addCharStats(pw)
+    addStats(pw)
 
     pw
       .empty(1)
@@ -73,13 +85,13 @@ class MapleCharacter
     pw.empty(6) // Unk?
   }
 
-  def addMonsterBookInfo(pw: PacketWriter): Unit = {
+  private def addMonsterBookInfo(pw: PacketWriter): Unit = {
     // TODO: MonsterBookInfo
     pw.write(0) // TODO: Cover?
       .empty(3)
   }
 
-  def addTeleportInfo(pw: PacketWriter): Unit = {
+  private def addTeleportInfo(pw: PacketWriter): Unit = {
     // TODO: Teleport rocks
     for (i <- 0 until 5)
       pw.write(999999999)
@@ -87,23 +99,23 @@ class MapleCharacter
       pw.write(999999999)
   }
 
-  def addRingInfo(pw: PacketWriter): Unit = {
+  private def addRingInfo(pw: PacketWriter): Unit = {
     // TODO: RingInfo
     pw.empty(6)
   }
 
-  def addQuestInfo(pw: PacketWriter): Unit = {
+  private def addQuestInfo(pw: PacketWriter): Unit = {
     // TODO: QuestInfo
     pw.empty(4)
     pw.empty(2)
   }
 
-  def addSkillInfo(pw: PacketWriter): Unit = {
+  private def addSkillInfo(pw: PacketWriter): Unit = {
     // TODO: SkillInfo
     pw.empty(4)
   }
 
-  def addInventoryInfo(pw: PacketWriter): Unit = {
+  private def addInventoryInfo(pw: PacketWriter): Unit = {
     pw
       .write(inventory.getSlots(Types.Equip))
       .write(inventory.getSlots(Types.Use))
@@ -133,19 +145,7 @@ class MapleCharacter
     pw.empty(1)
   }
 
-  def addCharEntry(pw: PacketWriter, viewall: Boolean): Unit = {
-    addCharStats(pw)
-    addCharLook(pw, mega = false)
-    if (!viewall)
-      pw.empty(1)
-
-    // TODO: isGM
-
-    pw.write(true) // World rank enabled?
-    pw.empty(16) // TODO: Ranks?
-  }
-
-  def addCharStats(pw: PacketWriter): Unit = {
+  private def addStats(pw: PacketWriter): Unit = {
     pw
       .write(id)
       .write(name.padTo(13, '\0'))
@@ -174,17 +174,17 @@ class MapleCharacter
       .empty(4)
   }
 
-  def addCharLook(pw: PacketWriter, mega: Boolean): Unit = {
+  private def addLook(pw: PacketWriter, mega: Boolean): Unit = {
     pw
       .write(gender)
       .write(skinColor)
       .write(face)
       .write(mega)
       .write(hair)
-    addCharEquips(pw)
+    addEquips(pw)
   }
 
-  def addCharEquips(pw: PacketWriter): Unit = {
+  private def addEquips(pw: PacketWriter): Unit = {
     val sep: Byte = -1
 
     val maskedEquips = inventory.getItems(Types.Equipped).filter(_.position >= 100)

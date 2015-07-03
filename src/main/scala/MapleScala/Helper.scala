@@ -20,10 +20,6 @@ import scala.util.Random
 object Helper {
   def random = new Random()
 
-  def toHex(bytes: Array[Byte], sep: String = " "): String = {
-    bytes.map("%02X".format(_)).mkString(sep)
-  }
-
   def using[A <: {def close() : Unit}, B](param: A)(f: A => B): B =
     try {
       f(param)

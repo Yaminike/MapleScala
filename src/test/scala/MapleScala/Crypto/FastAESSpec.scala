@@ -2,6 +2,7 @@ package MapleScala.Crypto
 
 import java.nio.{ByteBuffer, ByteOrder}
 
+import MapleScala.Util.Extensions._
 import org.scalatest._
 
 /**
@@ -51,6 +52,6 @@ class FastAESSpec extends FlatSpec with Matchers {
     for (i <- 0 until 10)
       FastAES.TransformBlock(buffer)
     buffer.foreach(result.putInt)
-    MapleScala.Helper.toHex(result.array()) should be("EC EB 61 6F 25 0A 15 A1 8D 1A 3B 80 EC 5E 49 36")
+    result.array().toHex() should be("EC EB 61 6F 25 0A 15 A1 8D 1A 3B 80 EC 5E 49 36")
   }
 }

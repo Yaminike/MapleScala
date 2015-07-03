@@ -32,4 +32,8 @@ object Extensions {
     def toMapleString: MapleString = new MapleString(value)
   }
 
+  implicit class ExtendedByteArray(val value: Array[Byte]) extends AnyVal {
+    def toHex(sep: String = " "): String = value.map(x => f"$x%02X").mkString(sep)
+  }
+
 }

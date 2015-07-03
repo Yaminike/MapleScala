@@ -26,7 +26,7 @@ object AuthHandler {
 }
 
 class AuthHandler extends Actor {
-  val users: mutable.Map[Int, AuthHolder] = mutable.Map()
+  val users: mutable.HashMap[Int, AuthHolder] = mutable.HashMap()
   var migrations = new ExpirationMap[Int, MigrationHolder](10 * 1000)
 
   def receive = {

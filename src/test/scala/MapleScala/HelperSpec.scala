@@ -1,5 +1,6 @@
 package MapleScala
 
+import MapleScala.Util.Extensions._
 import org.scalatest._
 
 /**
@@ -24,6 +25,6 @@ class HelperSpec extends FlatSpec with Matchers {
 
   "toHex" should "validate" in {
     val bytes: Array[Byte] = Array[Byte](1, 20, 30)
-    Helper.toHex(bytes) should be("01 14 1E")
+    bytes.toHex() should be("01 14 1E")
   }
 }

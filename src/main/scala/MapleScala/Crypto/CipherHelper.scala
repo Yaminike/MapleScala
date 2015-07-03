@@ -72,8 +72,8 @@ class CipherHelper(final val client: Client) {
     in.copyToArray(data)
 
     // Create packetheader
-    val header = new ByteStringBuilder
-    setPacketHeader(header, data.length)
+    val packet = new ByteStringBuilder
+    setPacketHeader(packet, data.length)
 
     // Shanda transform
     encryptShanda(data)
@@ -83,8 +83,8 @@ class CipherHelper(final val client: Client) {
     SIV = shuffle(SIV)
 
     // Combine header and data
-    header.putBytes(data)
-    header.result()
+    packet.putBytes(data)
+    packet.result()
   }
 
   /**

@@ -25,7 +25,7 @@ class CipherHelperSpec extends FlatSpec with Matchers {
   "transform" should "validate" in {
     val buffer: Array[Byte] = new Array(16)
     cipher.transform(buffer, 16, 0xDEADBEEF)
-    MapleScala.Helper.toHex(buffer) should be("9B E5 2F FE 37 3B 93 00 50 E0 09 FB FB 3F 97 A9")
+    buffer.toHex() should be("9B E5 2F FE 37 3B 93 00 50 E0 09 FB FB 3F 97 A9")
   }
 
   "decrypt and encrypt" should "validate" in {
@@ -47,7 +47,7 @@ class CipherHelperSpec extends FlatSpec with Matchers {
       cipher.decryptShanda(buffer)
     for (i <- 0 until 10)
       cipher.encryptShanda(buffer)
-    MapleScala.Helper.toHex(buffer) should be("00 00 00 00 00 00 00 00")
+    buffer.toHex() should be("00 00 00 00 00 00 00 00")
   }
 
   "shuffle" should "validate" in {
