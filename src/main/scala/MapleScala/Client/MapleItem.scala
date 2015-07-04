@@ -94,15 +94,18 @@ class MapleItem(pItemId: Int, pPosition: Byte, pAmount: Short)
     if (!zeroPosition) {
       if (isEquip)
         pw.write(pos.toShort)
+          .write(1.toByte)
       else
         pw.write(pos.toByte)
+          .write(invType.toByte)
     }
 
     pw
-      .write(invType.toByte)
       .write(itemId)
       .write(false) // TODO: isCash
       .write(-1L.toMapleTime) // TODO: addExpirationTime
+
+    // TODO: isPet
 
     if (!isEquip) {
       pw
@@ -137,7 +140,12 @@ class MapleItem(pItemId: Int, pPosition: Byte, pAmount: Short)
         .write(stats.flags.toShort)
 
         // TODO: isCash
-        .empty(18)
+        .empty(1)
+        .write(1.toByte) // TODO: Level
+        .write(0.toShort)
+        .write(0.toShort)
+        .write(0)
+        .write(0L)
         .write(-2L.toMapleTime)
         .write(-1)
     }

@@ -36,8 +36,7 @@ class CipherHelperSpec extends FlatSpec with Matchers {
     pw.write(sTest.toMapleString)
 
     for (i <- 0 until 10) {
-      val pr = cipher.decrypt(cipher.encrypt(pw.result).asByteBuffer)
-      pr.getString should be(sTest)
+      cipher.decrypt(cipher.encrypt(pw.result).asByteBuffer).foreach(_.getString should be(sTest))
     }
   }
 

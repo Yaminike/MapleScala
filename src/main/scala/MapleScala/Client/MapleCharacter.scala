@@ -79,6 +79,9 @@ class MapleCharacter
     addInventoryInfo(pw)
     addSkillInfo(pw)
     addQuestInfo(pw)
+
+    pw.empty(2) // This probably belongs to either questinfo or ringinfo though
+
     addRingInfo(pw)
     addTeleportInfo(pw)
     addMonsterBookInfo(pw)
@@ -107,7 +110,6 @@ class MapleCharacter
   private def addQuestInfo(pw: PacketWriter): Unit = {
     // TODO: QuestInfo
     pw.empty(4)
-    pw.empty(2)
   }
 
   private def addSkillInfo(pw: PacketWriter): Unit = {

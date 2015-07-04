@@ -28,38 +28,45 @@ class CipherHelper(final val client: Client) {
   private final val DefaultKey: Int = 0xC65053F2
   private final val GameVersion: Short = 83
 
-  // TODO: multiple packet support?
   /**
    * Decrypts data with the MapleCrypto
    * @param in Data to decrypt
    * @return Decrypted data
    */
-  def decrypt(in: ByteBuffer): PacketReader = {
+  def decrypt(in: ByteBuffer): Seq[PacketReader] = {
     in.position(0) // resets the position
     in.order(ByteOrder.LITTLE_ENDIAN) // Maple uses little endian
 
-    // Check the packet header
-    val left: Short = in.getShort
-    if (!checkPacketHeader(left) && client != null) {
-      client.connection ! Abort
-      println("Invalid packet header found, disconnecting the client")
-      return null
+    var read: Int = 0
+    var ret = Seq.empty[PacketReader]
+
+    while (in.capacity() > read) {
+      // Check the packet header
+      val left: Short = in.getShort
+      if (!checkPacketHeader(left) && client != null) {
+        client.connection ! Abort
+        println("Invalid packet header found, disconnecting the client")
+      } else {
+        // Copy to new array
+        val length: Int = getPacketLength(left, in.getShort)
+        val result: Array[Byte] = new Array[Byte](length)
+        in.get(result)
+
+        read += 4 + length
+
+        // AES transform
+        transform(result, length, RIV)
+        RIV = shuffle(RIV)
+
+        // Shanda transform
+        decryptShanda(result)
+
+        // Create result
+        ret :+= new PacketReader(ByteBuffer.wrap(result))
+      }
     }
 
-    // Copy to new array
-    val length: Int = getPacketLength(left, in.getShort)
-    val result: Array[Byte] = new Array[Byte](length)
-    in.get(result)
-
-    // AES transform
-    transform(result, length, RIV)
-    RIV = shuffle(RIV)
-
-    // Shanda transform
-    decryptShanda(result)
-
-    // Create result
-    new PacketReader(ByteBuffer.wrap(result))
+    ret
   }
 
   /**

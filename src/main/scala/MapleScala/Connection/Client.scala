@@ -43,9 +43,9 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
   private final val cipher = new CipherHelper(this)
   val loginstate = new Loginstatus
 
-  def receive = {
+  def receive = cipher.synchronized {
     case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
-    case Received(data) => PacketDistributer.distribute(cipher.decrypt(data.asByteBuffer), this)
+    case Received(data) => cipher.decrypt(data.asByteBuffer).foreach(PacketDistributer.distribute(_, this))
     case _: ConnectionClosed => disconnect()
     case _: Client.Handshake => handshake()
   }
