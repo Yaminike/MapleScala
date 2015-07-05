@@ -1,7 +1,6 @@
 package MapleScala.Connection
 
-import MapleScala.Authorization.AuthRequest.CreateMigration
-import MapleScala.Authorization.{AuthRequest, AuthResponse}
+import MapleScala.Authorization.AuthRequest
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
 import MapleScala.Crypto.CipherHelper
@@ -67,6 +66,7 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
   }
 
   def migrate(changeChannel: Boolean = false): Unit = {
+    loginstate.isMigrating = true
     for {
       user <- loginstate.user
       character <- loginstate.character

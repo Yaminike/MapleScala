@@ -1,10 +1,10 @@
 package MapleScala.Connection.Packets.Handlers
 
-import MapleScala.Authorization.{AuthStatus, AuthRequest, AuthResponse}
+import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
-import MapleScala.Data.{User, Character}
+import MapleScala.Data.{Character, User}
 import akka.io.Tcp.Abort
 import akka.pattern.ask
 import akka.util.Timeout

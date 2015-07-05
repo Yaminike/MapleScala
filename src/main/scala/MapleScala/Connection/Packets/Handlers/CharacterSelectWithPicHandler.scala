@@ -33,8 +33,7 @@ object CharacterSelectWithPicHandler extends PacketHandler {
     val characterId = packet.getInt
     packet.skip(packet.getShort) // Mac address?
 
-    for (user <- client.loginstate.user)
-    {
+    for (user <- client.loginstate.user) {
       if (user.validatePIC(pic)) {
         client.loginstate.character = user.getCharacter(characterId)
         (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PicAccepted)).onComplete({

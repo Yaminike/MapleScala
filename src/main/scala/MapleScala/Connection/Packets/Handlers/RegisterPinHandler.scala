@@ -7,7 +7,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.Success
 
 /**
  * Copyright 2015 Yaminike

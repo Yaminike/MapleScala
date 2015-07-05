@@ -1,8 +1,6 @@
 package MapleScala.Authorization
 
-import MapleScala.Authorization.AuthResponse.GetMigration
 import MapleScala.Data.User
-import MapleScala.Util.ExpirationMap
 import akka.actor.{Actor, Props}
 
 import scala.collection.mutable
@@ -78,12 +76,12 @@ class InterServerHandler extends Actor {
       sender ! {
         states.get(req.userId) match {
           case Some(holder) =>
-            if (holder.status == AuthStatus.All) {
-              holder.status = AuthStatus.ValueSet()
-              holder.characterId = req.characterId
-              holder.channel = req.channel
-              states(req.userId) = holder
+            holder.status = AuthStatus.ValueSet()
+            holder.characterId = req.characterId
+            holder.channel = req.channel
+            states(req.userId) = holder
 
+            if (holder.status == AuthStatus.All) {
               val key = generateMigrationKey()
               migrations(req.userId) = key
               key
