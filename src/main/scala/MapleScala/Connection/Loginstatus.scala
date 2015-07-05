@@ -1,5 +1,6 @@
 package MapleScala.Connection
 
+import MapleScala.Client.MapleCharacter
 import MapleScala.Data.User
 
 /**
@@ -17,8 +18,10 @@ import MapleScala.Data.User
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class Loginstatus {
-  var user: Option[User] = None
-  var world: Byte = 0
-  var channel: Byte = 0
-}
+class Loginstatus (
+  var user: Option[User] = None,
+  var character: Option[MapleCharacter] = None,
+  var world: Byte = 0,
+  var channel: Byte = 0,
+  var isMigrating: Boolean = false
+)

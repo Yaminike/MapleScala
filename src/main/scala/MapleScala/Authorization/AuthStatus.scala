@@ -20,4 +20,5 @@ object AuthStatus extends Enumeration {
   val LoggedIn = Value(0x01)
   val PinAccepted = Value(0x02)
   val PicAccepted = Value(0x04)
+  val All = LoggedIn + PinAccepted + PicAccepted
 }

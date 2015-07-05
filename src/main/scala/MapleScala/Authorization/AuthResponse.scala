@@ -19,14 +19,12 @@ import MapleScala.Data.User
  */
 object AuthResponse {
 
-  case class Login(result: Byte, user: Option[User])
+  case class Login(var result: Byte, user: Option[User])
 
   case class CheckLogin(loggedin: Boolean)
 
-  case class GetStatus(status: AuthStatus.ValueSet)
+  case class GetStatus(holder: AuthHolder)
 
-  case class Migrate(key: Int)
-
-  case class GetMigration(data: MigrationHolder)
+  case class GetMigration(holder: AuthHolder)
 
 }

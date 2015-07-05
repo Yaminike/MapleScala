@@ -19,15 +19,15 @@ object AuthRequest {
 
   case class Login(username: String, password: String)
 
-  case class Logout(id: Int)
-
   case class CheckLogin(id: Int)
+
+  case class Logout(id: Int)
 
   case class GetStatus(id: Int)
 
   case class SetStatus(id: Int, status: AuthStatus.AuthStatus)
 
-  case class Migrate(userId: Int, charId: Int, channel: Byte)
+  case class CreateMigration(userId: Int, characterId: Int, channel: Byte)
 
   case class GetMigration(key: Int)
 

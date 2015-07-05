@@ -31,14 +31,14 @@ object RegisterPicHandler extends PacketHandler {
 
   def handle(packet: PacketReader, client: Client): Unit = {
     packet.skip(1)
-    val charId = packet.getInt
+    val characterId = packet.getInt
 
     packet.skip(packet.getShort) // Mac address?
     packet.skip(packet.getShort) // Unk
 
     for {
       user <- client.loginstate.user
-      character <- user.getCharacter(charId)
+      character <- user.getCharacter(characterId)
     } {
       if (user.pic.nonEmpty) {
         client.connection ! Abort // Trying to register a pin while already having one registered
@@ -49,7 +49,7 @@ object RegisterPicHandler extends PacketHandler {
       user.save()
 
       (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PicAccepted)).onComplete({
-        case Success(result) => client.migrate(user.id, charId)
+        case Success(result) => client.migrate()
         case Failure(failure) => client.connection ! Abort
       })(client.context.dispatcher)
 

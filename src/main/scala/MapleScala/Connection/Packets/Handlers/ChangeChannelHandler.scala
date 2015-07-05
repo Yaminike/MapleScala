@@ -1,4 +1,7 @@
-package MapleScala.Authorization
+package MapleScala.Connection.Packets.Handlers
+
+import MapleScala.Connection.Client
+import MapleScala.Connection.Packets.PacketReader
 
 /**
  * Copyright 2015 Yaminike
@@ -15,4 +18,9 @@ package MapleScala.Authorization
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class MigrationHolder(val charId: Int, var channel: Byte)
+object ChangeChannelHandler extends PacketHandler {
+  def handle(packet: PacketReader, client: Client): Unit = {
+    client.loginstate.channel = packet.getByte
+    client.migrate(changeChannel = true)
+  }
+}

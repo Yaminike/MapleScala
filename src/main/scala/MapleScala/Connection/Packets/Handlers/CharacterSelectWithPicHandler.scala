@@ -30,16 +30,15 @@ object CharacterSelectWithPicHandler extends PacketHandler {
 
   def handle(packet: PacketReader, client: Client): Unit = {
     val pic = packet.getString
-    val charId = packet.getInt
+    val characterId = packet.getInt
     packet.skip(packet.getShort) // Mac address?
 
-    for {
-      user <- client.loginstate.user
-      character <- user.getCharacter(charId)
-    } {
+    for (user <- client.loginstate.user)
+    {
       if (user.validatePIC(pic)) {
+        client.loginstate.character = user.getCharacter(characterId)
         (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PicAccepted)).onComplete({
-          case Success(result) => client.migrate(user.id, charId)
+          case Success(result) => client.migrate()
           case Failure(failure) => client.connection ! Abort
         })(client.context.dispatcher)
         return

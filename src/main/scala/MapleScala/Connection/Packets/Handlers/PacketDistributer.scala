@@ -47,7 +47,8 @@ object PacketDistributer {
     CheckCharacterName -> CheckCharacterNameHandler,
     CreateCharacter -> CreateCharacterHandler,
     RegisterPic -> RegisterPicHandler,
-    CharacterSelectWithPic -> CharacterSelectWithPicHandler
+    CharacterSelectWithPic -> CharacterSelectWithPicHandler,
+    ChangeChannel -> ChangeChannelHandler
   )
 
   def distribute(packet: PacketReader, client: Client): Unit = {

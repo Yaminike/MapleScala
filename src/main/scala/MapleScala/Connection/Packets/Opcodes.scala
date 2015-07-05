@@ -36,6 +36,7 @@ object RecvOpcode {
   final val CharacterSelectWithPic: Short = 0x001E
 
   final val MapLogin: Short = 0x0023
+  final val ChangeChannel: Short = 0x0027
 }
 
 object SendOpcode {
@@ -50,6 +51,7 @@ object SendOpcode {
   final val CharacterNameResponse: Short = 0x000D
   final val AddNewCharacter: Short = 0x000E
 
+  final val ChangeChannel: Short = 0x0010
   final val Ping: Short = 0x0011
   final val DefaultWorld: Short = 0x001A
   final val CheckSPWResult: Short = 0x001C

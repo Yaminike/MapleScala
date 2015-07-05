@@ -1,6 +1,6 @@
 package MapleScala
 
-import MapleScala.Authorization.AuthHandler
+import MapleScala.Authorization.InterServerHandler
 import MapleScala.Connection.Server
 import akka.actor.ActorSystem
 import com.typesafe.config.{Config, ConfigFactory}
@@ -39,7 +39,7 @@ object Main extends App {
     Helper.time(loadWzData(), "Finished loading WZ data")
 
     val system = ActorSystem("MapleScala")
-    val auth = system.actorOf(AuthHandler.create, "server-auth")
+    val auth = system.actorOf(InterServerHandler.create, "server-auth")
     system.actorOf(Server.create(conf.getInt("server.ports.login"), auth), "server-login")
 
     val worlds = conf.getConfigList("server.worlds").toArray.map(_.asInstanceOf[Config])

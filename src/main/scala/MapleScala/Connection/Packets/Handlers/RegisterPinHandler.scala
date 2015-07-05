@@ -32,8 +32,8 @@ object RegisterPinHandler extends PacketHandler {
       (client.auth ? new AuthRequest.GetStatus(user.id)).onComplete({
         case Success(response: AuthResponse.GetStatus) =>
           if (packet.getByte != 0) {
-            if (response.status.contains(AuthStatus.LoggedIn) &&
-              (response.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
+            if (response.holder.status.contains(AuthStatus.LoggedIn) &&
+              (response.holder.status.contains(AuthStatus.PinAccepted) || user.pin.isEmpty)) {
               val pin = packet.getString
               if (pin.forall(_.isDigit)) {
                 user.pin = Some(pin.toInt)
@@ -42,7 +42,7 @@ object RegisterPinHandler extends PacketHandler {
             }
           }
           updatePin(client)
-        case Failure(failure) => updatePin(client)
+        case _ => updatePin(client)
       })(client.context.dispatcher)
     }
   }

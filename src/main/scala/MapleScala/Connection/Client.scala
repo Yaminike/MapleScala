@@ -1,5 +1,6 @@
 package MapleScala.Connection
 
+import MapleScala.Authorization.AuthRequest.CreateMigration
 import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Connection.Packets.Handlers.PacketDistributer
 import MapleScala.Connection.Packets._
@@ -41,7 +42,7 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
   import Tcp._
 
   private final val cipher = new CipherHelper(this)
-  val loginstate = new Loginstatus
+  var loginstate = new Loginstatus
 
   def receive = cipher.synchronized {
     case pw: PacketWriter => connection ! Write(cipher.encrypt(pw.result))
@@ -59,25 +60,45 @@ class Client(val connection: ActorRef, val auth: ActorRef) extends Actor {
 
   def logout(): Unit = {
     for (user <- loginstate.user) {
-      auth ! new AuthRequest.Logout(user.id)
-      loginstate.user = None
+      if (!loginstate.isMigrating)
+        auth ! new AuthRequest.Logout(user.id)
+      loginstate = new Loginstatus
     }
   }
 
-  def migrate(userId: Int, charId: Int): Unit = {
-    (auth ? new AuthRequest.Migrate(userId, charId, loginstate.channel)).onComplete({
-      case Success(result: AuthResponse.Migrate) =>
-        self ! new PacketWriter()
-          .write(SendOpcode.ServerIp)
-          .empty(2)
-          .write(MapleScala.Main.serverIp.split('.').map(_.toByte))
-          .write(MapleScala.Main.worldMap.getOrElse(loginstate.world, 0).toShort)
-          .write(result.key)
-          .empty(5)
-
-      case _ => connection ! Abort
-    })(context.dispatcher)
+  def migrate(changeChannel: Boolean = false): Unit = {
+    for {
+      user <- loginstate.user
+      character <- loginstate.character
+    } {
+      (auth ? new AuthRequest.CreateMigration(user.id, character.id, loginstate.channel)).onComplete({
+        case Success(key: Int) =>
+          val ip = MapleScala.Main.serverIp.split('.').map(_.toByte)
+          val port = MapleScala.Main.worldMap.getOrElse(loginstate.world, 0) + loginstate.channel
+          self ! {
+            if (changeChannel)
+              channelMigrate(ip, port.toShort)
+            else
+              loginMigrate(key, ip, port.toShort)
+          }
+        case _ => connection ! Abort
+      })(context.dispatcher)
+    }
   }
+
+  private def channelMigrate(ip: Array[Byte], port: Short): PacketWriter = new PacketWriter()
+    .write(SendOpcode.ChangeChannel)
+    .write(true)
+    .write(ip)
+    .write(port)
+
+  private def loginMigrate(key: Int, ip: Array[Byte], port: Short): PacketWriter = new PacketWriter()
+    .write(SendOpcode.ServerIp)
+    .empty(2)
+    .write(ip)
+    .write(port)
+    .write(key)
+    .empty(5)
 
   private def disconnect() = {
     logout()

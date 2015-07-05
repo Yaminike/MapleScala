@@ -1,10 +1,10 @@
 package MapleScala.Connection.Packets.Handlers
 
-import MapleScala.Authorization.{AuthRequest, AuthResponse}
+import MapleScala.Authorization.{AuthStatus, AuthRequest, AuthResponse}
 import MapleScala.Client.MapleCharacter
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.PacketReader
-import MapleScala.Data.Character
+import MapleScala.Data.{User, Character}
 import akka.io.Tcp.Abort
 import akka.pattern.ask
 import akka.util.Timeout
@@ -34,10 +34,14 @@ object PlayerLoggedinHandler extends PacketHandler {
     val key = packet.getInt
     (client.auth ? new AuthRequest.GetMigration(key)).onComplete({
       case Success(response: AuthResponse.GetMigration) =>
-        Character.getById(response.data.charId) match {
-          case Some(player) => createResponse(player, client, response.data.channel)
+        client.loginstate.character = Character.getById(response.holder.characterId)
+        client.loginstate.character match {
+          case Some(player) =>
+            createResponse(player, client, response.holder.channel)
+            client.loginstate.user = User.getById(player.userId)
           case None => client.connection ! Abort
         }
+
       case _ => client.connection ! Abort
     })(client.context.dispatcher)
   }
