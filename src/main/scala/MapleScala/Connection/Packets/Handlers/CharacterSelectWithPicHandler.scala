@@ -38,7 +38,7 @@ object CharacterSelectWithPicHandler extends PacketHandler {
         client.loginstate.character = user.getCharacter(characterId)
         (client.auth ? new AuthRequest.SetStatus(user.id, AuthStatus.PicAccepted)).onComplete({
           case Success(result) => client.migrate()
-          case Failure(failure) => client.connection ! Abort
+          case Failure(failure) => client.self ! invalidPic
         })(client.context.dispatcher)
         return
       }

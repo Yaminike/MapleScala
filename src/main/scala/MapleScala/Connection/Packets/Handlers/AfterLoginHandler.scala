@@ -3,6 +3,7 @@ package MapleScala.Connection.Packets.Handlers
 import MapleScala.Authorization.{AuthRequest, AuthStatus}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Main
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -28,6 +29,9 @@ object AfterLoginHandler extends PacketHandler {
   implicit val timeout = Timeout(5.seconds)
 
   def handle(packet: PacketReader, client: Client): Unit = {
+    if (!Main.pinEnabled)
+      return
+
     for (user <- client.loginstate.user) {
       val step = packet.getByte
       var state: Byte = -1
@@ -69,7 +73,7 @@ object AfterLoginHandler extends PacketHandler {
     }
   }
 
-  private def pinOperation(client: Client, reason: Byte): Unit = {
+  def pinOperation(client: Client, reason: Byte): Unit = {
     val pw = new PacketWriter()
       .write(SendOpcode.CheckPin)
       .write(reason)
@@ -77,7 +81,7 @@ object AfterLoginHandler extends PacketHandler {
     client.self ! pw
   }
 
-  private object Reasons {
+  object Reasons {
     final val Request: Byte = 0x04
     final val RequestAfterFailure: Byte = 0x02
     final val Register: Byte = 0x01

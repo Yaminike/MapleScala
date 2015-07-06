@@ -27,6 +27,7 @@ object RecvOpcode {
   final val ViewAllCharacters: Short = 0x000D
   final val ViewAllCharactersCancel: Short = 0x000F
 
+  final val CharacterSelect: Short = 0x0013
   final val PlayerLoggedin: Short = 0x0014
   final val CheckCharacterName: Short = 0x0015
   final val CreateCharacter: Short = 0x0016

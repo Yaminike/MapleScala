@@ -1,4 +1,8 @@
 {
+  "login": {
+    "pin": false,
+    "pic": false
+  },
   "server": {
     "ip": "10.0.1.95",
     "ports": {
@@ -31,5 +35,8 @@
     "poolConnectionTimeoutMillis": 1000,
     "poolValidationQuery": "select 1 as one",
     "poolFactoryName": "commons-dbcp"
+  },
+  "akka": {
+    "jvm-exit-on-fatal-error": "off"
   }
 }

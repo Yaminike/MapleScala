@@ -4,6 +4,7 @@ import MapleScala.Authorization.{AuthRequest, AuthResponse}
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets._
 import MapleScala.Data.User
+import MapleScala.Main
 import MapleScala.Util.Extensions._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -39,12 +40,13 @@ object LoginHandler extends PacketHandler {
           client.loginstate.user = response.user
           for (user <- response.user) {
             validLogin(user, client)
+            if (!Main.pinEnabled)
+              AfterLoginHandler.pinOperation(client, AfterLoginHandler.Reasons.Accept)
           }
         } else {
           failedLogin(client, response.result)
         }
-      case Failure(failure) =>
-        failedLogin(client, 6)
+      case _ => failedLogin(client, 6)
     })(client.context.dispatcher)
   }
 

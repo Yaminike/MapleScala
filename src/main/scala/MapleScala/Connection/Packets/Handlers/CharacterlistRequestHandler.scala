@@ -2,6 +2,7 @@ package MapleScala.Connection.Packets.Handlers
 
 import MapleScala.Connection.Client
 import MapleScala.Connection.Packets.{PacketReader, PacketWriter, SendOpcode}
+import MapleScala.Main
 
 /**
  * Copyright 2015 Yaminike
@@ -39,7 +40,11 @@ object CharacterlistRequestHandler extends PacketHandler {
 
       characters.foreach(_.addCharacterEntry(pw, viewall = false))
 
-      pw.write(user.pic.nonEmpty) // 2 = pic disabled?
+      if (Main.picEnabled)
+        pw.write(user.pic.nonEmpty)
+      else
+        pw.write(2.toByte)
+
       pw.write(9) // TODO: Character slots
 
       client.self ! pw

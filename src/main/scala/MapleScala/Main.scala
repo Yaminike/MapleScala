@@ -24,6 +24,8 @@ import scalikejdbc._
 object Main extends App {
   final lazy val conf = ConfigFactory.load()
   final lazy val serverIp = conf.getString("server.ip")
+  final lazy val pinEnabled: Boolean = conf.getBoolean("login.pic")
+  final lazy val picEnabled: Boolean = conf.getBoolean("login.pic")
 
   /**
    * A map of worldIds and their starting port
@@ -38,7 +40,7 @@ object Main extends App {
 
     Helper.time(loadWzData(), "Finished loading WZ data")
 
-    val system = ActorSystem("MapleScala")
+    val system = ActorSystem("MapleScala", conf.getConfig("akka"))
     val auth = system.actorOf(InterServerHandler.create, "server-auth")
     system.actorOf(Server.create(conf.getInt("server.ports.login"), auth), "server-login")
 

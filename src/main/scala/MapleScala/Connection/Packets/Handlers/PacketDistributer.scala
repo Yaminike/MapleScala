@@ -44,6 +44,7 @@ object PacketDistributer {
     ViewAllCharacters -> ViewAllCharactersHandler,
     ViewAllCharactersCancel -> EmptyHandler,
 
+    CharacterSelect -> CharacterSelectHandler,
     CheckCharacterName -> CheckCharacterNameHandler,
     CreateCharacter -> CreateCharacterHandler,
     RegisterPic -> RegisterPicHandler,

@@ -1,6 +1,7 @@
 package MapleScala.Authorization
 
 import MapleScala.Data.User
+import MapleScala.Main
 import akka.actor.{Actor, Props}
 
 import scala.collection.mutable
@@ -37,9 +38,14 @@ class InterServerHandler extends Actor {
           if (!user.validatePassword(req.password)) {
             response.result = 4
           } else {
-            states += user.id -> new AuthHolder {
-              status += AuthStatus.LoggedIn
-            }
+            val holder = new AuthHolder()
+            holder.status += AuthStatus.LoggedIn
+            if (!Main.pinEnabled)
+              holder.status += AuthStatus.PinAccepted
+            if (!Main.picEnabled)
+              holder.status += AuthStatus.PicAccepted
+
+            states += user.id -> holder
             response.result = 0
           }
         case None => response.result = 5
@@ -76,12 +82,13 @@ class InterServerHandler extends Actor {
       sender ! {
         states.get(req.userId) match {
           case Some(holder) =>
-            holder.status = AuthStatus.ValueSet()
             holder.characterId = req.characterId
             holder.channel = req.channel
             states(req.userId) = holder
 
             if (holder.status == AuthStatus.All) {
+              holder.status = AuthStatus.ValueSet()
+
               val key = generateMigrationKey()
               migrations(req.userId) = key
               key
